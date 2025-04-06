@@ -48,3 +48,19 @@ def add_qualification(request):
     else:
         form = QualificationForm()
     return render(request, 'users/add_qualification.html', {'form': form})
+
+@login_required
+def dashboard(request):
+    user = request.user
+    profile = user.profile
+    skills = user.skills.all()
+    reviews = user.reviews_received.all()
+    swap_requests = user.requests_received.filter(status='pending')
+    
+    context = {
+        'profile': profile,
+        'skills': skills,
+        'reviews': reviews,
+        'swap_requests': swap_requests,
+    }
+    return render(request, 'users/dashboard.html', context)

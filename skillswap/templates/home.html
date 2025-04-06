@@ -12,7 +12,7 @@
                 of skill-swappers today!</p>
             <div class="d-flex gap-3">
                 {% if user.is_authenticated %}
-                <a href="{% url 'browse_skills' %}" class="btn btn-primary btn-lg">
+                <a href="{% url 'skills:browse_skills' %}" class="btn btn-primary btn-lg">
                     <i class="fas fa-search me-2"></i>Browse Skills
                 </a>
                 {% else %}

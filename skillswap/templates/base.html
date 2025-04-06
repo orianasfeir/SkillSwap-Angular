@@ -96,17 +96,17 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">
+                            <a class="nav-link" href="{% url 'users:dashboard' %}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'browse_skills' %}">
+                            <a class="nav-link" href="{% url 'skills:browse_skills' %}">
                                 <i class="fas fa-search me-1"></i>Browse Skills
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile' user.username %}">
+                            <a class="nav-link" href="{% url 'profile' %}">
                                 <i class="fas fa-user me-1"></i>Profile
                             </a>
                         </li>
