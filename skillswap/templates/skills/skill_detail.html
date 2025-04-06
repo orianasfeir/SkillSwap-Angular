@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="rounded-lg shadow-md p-6">
         <h1 class="text-3xl font-bold mb-4">{{ skill.name }}</h1>
         <p class="text-gray-600 mb-4">{{ skill.description }}</p>
         
@@ -13,11 +13,11 @@
             <div class="mb-6">
                 <h2 class="text-xl font-semibold mb-2">Your Qualifications</h2>
                 {% for qualification in user_skill.qualifications.all %}
-                    <div class="border rounded p-4 mb-2">
+                    <div class="border rounded p-4 mb-2 max-w-md">
                         {% if qualification.qualification_image %}
                             <img src="{{ qualification.qualification_image }}" 
                                  alt="Qualification Image" 
-                                 class="w-32 h-32 object-cover mb-2">
+                                 class="w-16 h-16 object-cover mb-2">
                         {% endif %}
                         <p class="text-gray-600">{{ qualification.description }}</p>
                         <div class="flex items-center mt-2">

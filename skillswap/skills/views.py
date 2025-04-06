@@ -9,7 +9,7 @@ from reviews.models import Review
 def add_skill(request):
     if request.method == 'POST':
         skill_form = AddSkillForm(request.user, request.POST)
-        qualification_form = QualificationForm(request.POST)
+        qualification_form = QualificationForm(request.POST, request.FILES)
         
         if skill_form.is_valid() and qualification_form.is_valid():
             # Create the user skill
@@ -18,7 +18,7 @@ def add_skill(request):
             user_skill.save()
             
             # Create and associate the qualification if provided
-            if qualification_form.cleaned_data['name']:
+            if qualification_form.cleaned_data.get('qualification_image') or qualification_form.cleaned_data.get('description'):
                 qualification = qualification_form.save()
                 user_skill.qualifications.add(qualification)
             

@@ -15,7 +15,7 @@ class AddSkillForm(forms.ModelForm):
         model = UserSkill
         fields = ['skill', 'proficiency_level']
         widgets = {
-            'proficiency_level': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'proficiency_level': forms.NumberInput(attrs={'min': 1, 'max': 10}),
         }
 
     def __init__(self, user, *args, **kwargs):
