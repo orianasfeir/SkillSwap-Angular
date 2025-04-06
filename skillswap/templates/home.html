@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - SkillSwap{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Exchange Skills, Grow Together</h1>
+            <p class="lead mb-4">Connect with others to teach what you know and learn what you don't. Join our community
+                of skill-swappers today!</p>
+            <div class="d-flex gap-3">
+                {% if user.is_authenticated %}
+                <a href="{% url 'browse_skills' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Browse Skills
+                </a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="https://placehold.co/600x400" alt="SkillSwap Illustration" class="img-fluid rounded-3">
+        </div>
+    </div>
+</section>
+
+<!-- Featured Skills Section -->
+<section class="featured-skills py-5">
+    <h2 class="text-center mb-5">Featured Skills</h2>
+    <div class="row g-4">
+        {% for skill in featured_skills %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ skill.name }}</h5>
+                    <p class="card-text">{{ skill.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ skill.created_at|timesince }} ago
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'skill_detail' skill.id %}" class="btn btn-outline-primary w-100">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works py-5 bg-dark-surface">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="mb-3">
+                    <i class="fas fa-list-alt fa-3x text-primary"></i>
+                </div>
+                <h4>List Your Skills</h4>
+                <p>Share what you can teach and what you want to learn</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="mb-3">
+                    <i class="fas fa-search fa-3x text-primary"></i>
+                </div>
+                <h4>Find Matches</h4>
+                <p>Discover people with complementary skills</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <div class="mb-3">
+                    <i class="fas fa-exchange-alt fa-3x text-primary"></i>
+                </div>
+                <h4>Swap Skills</h4>
+                <p>Connect and exchange knowledge with others</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials py-5">
+    <h2 class="text-center mb-5">What Our Users Say</h2>
+    <div class="row g-4">
+        {% for review in recent_reviews %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://placehold.co/50x50"
+                            alt="{{ review.reviewer.username }}" class="rounded-circle me-3" width="50" height="50">
+                        <div>
+                            <h6 class="mb-0">{{ review.reviewer.username }}</h6>
+                            <div class="text-warning">
+                                {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %} <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-text">{{ review.comment|truncatewords:30 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

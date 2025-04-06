@@ -58,7 +58,7 @@ ROOT_URLCONF = 'skillswap.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,7 +82,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'skillswap',
         'USER': 'postgres',
-        'PASSWORD': '1234',
+        'PASSWORD': 'rootpass',
+        # 'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }

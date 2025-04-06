@@ -5,6 +5,7 @@ class Skill(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'skills'

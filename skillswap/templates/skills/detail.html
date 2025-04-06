@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ skill.title }} - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Skill Details -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h2 class="card-title mb-2">{{ skill.title }}</h2>
+                        <span class="badge bg-primary">{{ skill.category }}</span>
+                    </div>
+                    <div class="text-warning">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= skill.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted">({{ skill.review_count }} reviews)</small>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Description</h5>
+                    <p class="card-text">{{ skill.description }}</p>
+                </div>
+                
+                {% if skill.requirements %}
+                    <div class="mb-4">
+                        <h5>Requirements</h5>
+                        <ul class="list-unstyled">
+                            {% for requirement in skill.requirements %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>{{ requirement }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                {% if skill.duration %}
+                    <div class="mb-4">
+                        <h5>Duration</h5>
+                        <p class="card-text">{{ skill.duration }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if skill.location %}
+                    <div class="mb-4">
+                        <h5>Location</h5>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ skill.location }}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Reviews Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Reviews</h5>
+            </div>
+            <div class="card-body">
+                {% for review in skill.reviews.all %}
+                    <div class="mb-4 pb-4 border-bottom">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{{ review.reviewer.profile.avatar.url|default:'https://placehold.co/40x40' }}" 
+                                 alt="{{ review.reviewer.username }}" 
+                                 class="rounded-circle me-3" 
+                                 width="40" 
+                                 height="40">
+                            <div>
+                                <h6 class="mb-0">{{ review.reviewer.username }}</h6>
+                                <div class="text-warning">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= review.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-text">{{ review.comment }}</p>
+                        <small class="text-muted">{{ review.created_at|timesince }} ago</small>
+                    </div>
+                {% empty %}
+                    <p class="text-muted text-center py-4">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Provider Info & Request Form -->
+    <div class="col-md-4">
+        <!-- Provider Card -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img src="{{ skill.user.profile.avatar.url|default:'https://placehold.co/100x100' }}" 
+                     alt="{{ skill.user.username }}" 
+                     class="rounded-circle mb-3" 
+                     width="100" 
+                     height="100">
+                <h5 class="card-title">{{ skill.user.username }}</h5>
+                <p class="text-muted">{{ skill.user.profile.bio|default:"No bio yet" }}</p>
+                
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    {% if skill.user.profile.location %}
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ skill.user.profile.location }}
+                        </span>
+                    {% endif %}
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-star me-1"></i>{{ skill.user.profile.rating|default:"New" }}
+                    </span>
+                </div>
+                
+                <a href="{% url 'profile' skill.user.username %}" class="btn btn-outline-primary w-100">
+                    View Profile
+                </a>
+            </div>
+        </div>
+        
+        <!-- Request Form -->
+        {% if user.is_authenticated and user != skill.user %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Request Skill Swap</h5>
+                    <form method="post" action="{% url 'request_skill' skill.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea name="message" 
+                                      id="message" 
+                                      class="form-control" 
+                                      rows="4" 
+                                      placeholder="Tell the provider why you're interested in learning this skill..."
+                                      required></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="proposed_skill" class="form-label">Your Offered Skill</label>
+                            <select name="proposed_skill" id="proposed_skill" class="form-select" required>
+                                <option value="">Select a skill to offer</option>
+                                {% for user_skill in user_skills %}
+                                    <option value="{{ user_skill.id }}">{{ user_skill.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% elif not user.is_authenticated %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <p class="mb-3">Want to request this skill?</p>
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Request
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
