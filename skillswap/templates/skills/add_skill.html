@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+        <div class="rounded-lg shadow-md p-6">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Add a New Skill</h1>
+            
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Skill Information</h2>
+                    <div class="space-y-3">
+                        {% for field in skill_form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ field.label }}
+                                </label>
+                                <div class="mt-1">
+                                    {{ field }}
+                                </div>
+                                {% if field.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Qualification (Optional)</h2>
+                    <div class="space-y-3">
+                        {% for field in qualification_form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ field.label }}
+                                </label>
+                                <div class="mt-1">
+                                    {% if field.name == 'qualification_image' %}
+                                        <div class="flex items-center space-x-4">
+                                            <div class="flex-1">
+                                                {{ field }}
+                                            </div>
+                                            <div class="preview-container hidden">
+                                                <img id="preview" class="h-20 w-20 object-cover rounded" src="#" alt="Preview">
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+                                </div>
+                                {% if field.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-4">
+                    <a href="{% url 'skills:browse_skills' %}" 
+                       class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                        Add Skill
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Form field styling */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select,
+    input[type="file"] {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    }
+    
+    /* File input specific styling */
+    input[type="file"] {
+        @apply file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100;
+    }
+    
+    /* Error styling */
+    .errorlist {
+        @apply list-none p-0 m-0 text-red-600 text-sm;
+    }
+    
+    /* Help text styling */
+    .helptext {
+        @apply block text-sm text-gray-500 mt-1;
+    }
+</style>
+
+<script>
+    // Preview image before upload
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('input[type="file"]');
+        const previewContainer = document.querySelector('.preview-container');
+        const preview = document.getElementById('preview');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

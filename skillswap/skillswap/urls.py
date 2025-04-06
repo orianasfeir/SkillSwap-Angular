@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 from users import views as user_views
 from skills import views as skill_views
 from swaps import views as swap_views
@@ -31,3 +33,6 @@ urlpatterns = [
     path('swaps/accept/<int:swap_id>/', swap_views.accept_swap, name='accept_swap'),
     path('swaps/reject/<int:swap_id>/', swap_views.reject_swap, name='reject_swap'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

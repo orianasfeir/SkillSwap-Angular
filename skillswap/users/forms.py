@@ -10,9 +10,19 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
 
 class ProfileEditForm(forms.ModelForm):
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
+    
     class Meta:
         model = User
         fields = ['email', 'phone', 'profile_image', 'about']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'about': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
 
 class QualificationForm(forms.ModelForm):
     class Meta:

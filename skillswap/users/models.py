@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
-    profile_image = models.TextField(blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     about = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -53,7 +53,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class Qualification(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='qualifications')
-    qualification_image = models.TextField(blank=True, null=True)
+    qualification_image = models.ImageField(upload_to='qualifications/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

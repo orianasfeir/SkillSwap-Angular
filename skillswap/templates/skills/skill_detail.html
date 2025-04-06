@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ skill.name }} - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-3xl font-bold mb-4">{{ skill.name }}</h1>
+        <p class="text-gray-600 mb-4">{{ skill.description }}</p>
+        
+        {% if user_has_skill %}
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-2">Your Qualifications</h2>
+                {% for qualification in user_skill.qualifications.all %}
+                    <div class="border rounded p-4 mb-2">
+                        {% if qualification.qualification_image %}
+                            <img src="{{ qualification.qualification_image }}" 
+                                 alt="Qualification Image" 
+                                 class="w-32 h-32 object-cover mb-2">
+                        {% endif %}
+                        <p class="text-gray-600">{{ qualification.description }}</p>
+                        <div class="flex items-center mt-2">
+                            <span class="text-sm text-gray-500">
+                                {% if qualification.verified %}
+                                    <span class="text-green-500">✓ Verified</span>
+                                {% else %}
+                                    <span class="text-yellow-500">Pending Verification</span>
+                                {% endif %}
+                            </span>
+                            <span class="text-sm text-gray-500 ml-4">
+                                Added: {{ qualification.created_at|date:"F j, Y" }}
+                            </span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-600">No qualifications added yet.</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Reviews</h2>
+            {% for review in reviews %}
+                <div class="border rounded p-4 mb-2">
+                    <div class="flex items-center mb-2">
+                        <img src="{{ review.reviewer.profile_image.url|default:'https://placehold.co/150x150' }}" 
+                             alt="{{ review.reviewer.username }}" 
+                             class="w-10 h-10 rounded-full mr-2">
+                        <div>
+                            <p class="font-semibold">{{ review.reviewer.username }}</p>
+                            <div class="flex">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <span class="text-yellow-400">★</span>
+                                    {% else %}
+                                        <span class="text-gray-300">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">{{ review.text }}</p>
+                </div>
+            {% empty %}
+                <p class="text-gray-600">No reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

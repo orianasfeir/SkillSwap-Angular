@@ -1,28 +1,36 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Skill
-from .forms import AddSkillForm 
+from .models import Skill, UserSkill
+from .forms import AddSkillForm, QualificationForm
 from reviews.models import Review
 
 @login_required
 def add_skill(request):
-    user = request.user
-    available_skills = Skill.objects.exclude(users=user)
-    
     if request.method == 'POST':
-        form = AddSkillForm(user, request.POST)
-        if form.is_valid():
-            skill = form.cleaned_data['skill']
-            user.skills.add(skill)
-            messages.success(request, f'Added skill: {skill.name}')
-            return redirect('profile')
+        skill_form = AddSkillForm(request.user, request.POST)
+        qualification_form = QualificationForm(request.POST)
+        
+        if skill_form.is_valid() and qualification_form.is_valid():
+            # Create the user skill
+            user_skill = skill_form.save(commit=False)
+            user_skill.user = request.user
+            user_skill.save()
+            
+            # Create and associate the qualification if provided
+            if qualification_form.cleaned_data['name']:
+                qualification = qualification_form.save()
+                user_skill.qualifications.add(qualification)
+            
+            messages.success(request, 'Skill added successfully!')
+            return redirect('skills:browse_skills')
     else:
-        form = AddSkillForm(user)
+        skill_form = AddSkillForm(request.user)
+        qualification_form = QualificationForm()
     
     return render(request, 'skills/add_skill.html', {
-        'form': form,
-        'available_skills': available_skills
+        'skill_form': skill_form,
+        'qualification_form': qualification_form,
     })
 
 @login_required
@@ -78,3 +86,20 @@ def delete_skill(request, skill_id):
     return render(request, 'skills/delete_skill.html', {
         'skill': skill
     })
+
+@login_required
+def skill_detail(request, skill_id):
+    skill = get_object_or_404(Skill, id=skill_id)
+    user_has_skill = UserSkill.objects.filter(user=request.user, skill=skill).exists()
+    
+    # Get reviews through swap requests where this skill was involved
+    reviews = Review.objects.filter(
+        swap_request__skill_requested=skill
+    ).select_related('reviewer')
+    
+    context = {
+        'skill': skill,
+        'user_has_skill': user_has_skill,
+        'reviews': reviews,
+    }
+    return render(request, 'skills/skill_detail.html', context)

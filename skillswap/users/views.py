@@ -3,6 +3,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .models import Qualification
 from .forms import CustomUserCreationForm, ProfileEditForm, QualificationForm
+from skills.models import UserSkill
+from reviews.models import Review
 
 def register(request):
     if request.method == 'POST':
@@ -17,11 +19,16 @@ def register(request):
 
 @login_required
 def profile(request):
-    user = request.user
+    profile_user = request.user
+    user_skills = UserSkill.objects.filter(user=profile_user).select_related('skill')
+    reviews = Review.objects.filter(user_reviewed=profile_user).select_related('reviewer')
+    completed_swaps = profile_user.requests_received.filter(status='completed')
+    
     context = {
-        'user': user,
-        'skills': user.skills.all(),
-        'qualifications': user.qualifications.all()
+        'profile_user': profile_user,
+        'skills': [user_skill.skill for user_skill in user_skills],
+        'reviews': reviews,
+        'completed_swaps': completed_swaps
     }
     return render(request, 'users/profile.html', context)
 
