@@ -1,1 +1,72 @@
- 
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4 text-white">Edit Skill: {{ user_skill.skill.name }}</h2>
+                
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h3 class="text-xl font-semibold text-white mb-3">Skill Information</h3>
+                        <div class="space-y-3">
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label text-white">
+                                        {{ field.label }}
+                                    </label>
+                                    <div class="mt-1">
+                                        {{ field }}
+                                    </div>
+                                    {% if field.help_text %}
+                                        <p class="mt-1 text-sm text-gray-300">{{ field.help_text }}</p>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                        <div class="mt-1 text-sm text-orange-400 font-medium">
+                                            {{ field.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'skills:browse_skills' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Form field styling */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select,
+    input[type="file"] {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    }
+    
+    /* Error styling */
+    .errorlist {
+        @apply list-none p-0 m-0 text-orange-400 font-medium;
+    }
+    
+    /* Help text styling */
+    .helptext {
+        @apply block text-sm text-gray-500 mt-1;
+    }
+</style>
+{% endblock %} 

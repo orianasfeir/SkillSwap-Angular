@@ -56,36 +56,34 @@ def home(request):
 
 @login_required
 def edit_skill(request, skill_id):
-    skill = get_object_or_404(Skill, id=skill_id)
+    user_skill = get_object_or_404(UserSkill, id=skill_id, user=request.user)
     
     if request.method == 'POST':
-        form = AddSkillForm(request.user, request.POST, instance=skill)
+        form = AddSkillForm(request.user, request.POST, instance=user_skill)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Skill "{skill.name}" updated successfully.')
+            messages.success(request, f'Skill "{user_skill.skill.name}" updated successfully.')
             return redirect('skills:browse_skills')
     else:
-        form = AddSkillForm(request.user, instance=skill)
+        form = AddSkillForm(request.user, instance=user_skill)
     
     return render(request, 'skills/edit_skill.html', {
         'form': form,
-        'skill': skill
+        'user_skill': user_skill
     })
 
 @login_required
 def delete_skill(request, skill_id):
-    """Delete a skill after confirmation."""
-    skill = get_object_or_404(Skill, id=skill_id)
+    """Delete a user's skill after confirmation."""
+    user_skill = get_object_or_404(UserSkill, id=skill_id, user=request.user)
     
     if request.method == 'POST':
-        skill_name = skill.name
-        skill.delete()
+        skill_name = user_skill.skill.name
+        user_skill.delete()
         messages.success(request, f'Skill "{skill_name}" deleted successfully.')
-        return redirect('skills:browse_skills')
+        return redirect('users:dashboard')
     
-    return render(request, 'skills/delete_skill.html', {
-        'skill': skill
-    })
+    return redirect('users:dashboard')
 
 @login_required
 def skill_detail(request, skill_id):
