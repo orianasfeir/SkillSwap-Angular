@@ -19,7 +19,7 @@ def create_swap_request(request, user_id, skill_id):
             status='pending'
         )
         swap.save()
-        return redirect('swap_requests')
+        return redirect('swaps:swap_list')
     
     requested_user = get_object_or_404(User, pk=user_id)
     offered_skill = get_object_or_404(Skill, pk=skill_id)
