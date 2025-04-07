@@ -33,18 +33,22 @@ def create_swap_request(request, user_id, skill_id):
 @login_required
 def swap_requests(request):
     requests = SkillSwapRequest.objects.filter(user_requested=request.user, status='pending')
-    return render(request, 'swaps/list.html', {'swap_requests': requests})
+    unread_count = requests.filter(is_read=False).count()
+    return render(request, 'swaps/list.html', {
+        'swap_requests': requests,
+        'unread_count': unread_count
+    })
 
 @login_required
-def accept_swap(request, request_id):
-    swap = get_object_or_404(SkillSwapRequest, pk=request_id, user_requested=request.user)
+def accept_swap(request, swap_id):
+    swap = get_object_or_404(SkillSwapRequest, pk=swap_id, user_requested=request.user)
     swap.status = 'accepted'
     swap.save()
-    return redirect('swap_requests')
+    return redirect('swaps:swap_list')
 
 @login_required
-def reject_swap(request, request_id):
-    swap = get_object_or_404(SkillSwapRequest, pk=request_id, user_requested=request.user)
+def reject_swap(request, swap_id):
+    swap = get_object_or_404(SkillSwapRequest, pk=swap_id, user_requested=request.user)
     swap.status = 'rejected'
     swap.save()
-    return redirect('swap_requests')
+    return redirect('swaps:swap_list')

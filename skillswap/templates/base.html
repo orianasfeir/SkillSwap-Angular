@@ -130,6 +130,11 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.resolver_match.url_name == 'swap_list' %}active{% endif %}" href="{% url 'swaps:swap_list' %}">
                                 <i class="fas fa-handshake me-1"></i>Swap Requests
+                                {% if unread_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ unread_count }}
+                                </span>
+                                {% endif %}
                             </a>
                         </li>
                         <li class="nav-item">

@@ -18,6 +18,7 @@ class SkillSwapRequest(models.Model):
     proposed_time = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'skill_swap_requests'

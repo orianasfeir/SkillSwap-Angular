@@ -109,23 +109,36 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h6 class="mb-1">{{ request.skill.title }}</h6>
-                                            <p class="mb-1 small text-muted">
-                                                From: {{ request.requester.username }}
-                                            </p>
+                                            <h6 class="mb-1 text-gray-800">{{ request.user_requesting.username }} wants to learn {{ request.skill_offered.name }}</h6>
+                                            <div class="space-y-1">
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Offered Skill:</span> {{ request.skill_requested.name }}
+                                                </p>
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Requested Skill:</span> {{ request.skill_offered.name }}
+                                                </p>
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Proposed Time:</span> {{ request.proposed_time|date:"F j, Y, g:i a" }}
+                                                </p>
+                                                {% if request.message %}
+                                                    <p class="mb-1 small text-gray-600">
+                                                        <span class="font-medium">Message:</span> {{ request.message }}
+                                                    </p>
+                                                {% endif %}
+                                            </div>
                                             <span class="badge bg-{{ request.status_color }}">
                                                 {{ request.get_status_display }}
                                             </span>
                                         </div>
                                         <div class="btn-group">
                                             {% if request.status == 'pending' %}
-                                                <form method="post" action="{% url 'request_accept' request.id %}" class="d-inline">
+                                                <form method="post" action="{% url 'swaps:accept_swap' request.id %}" class="d-inline">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-success btn-sm">
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 </form>
-                                                <form method="post" action="{% url 'request_reject' request.id %}" class="d-inline">
+                                                <form method="post" action="{% url 'swaps:reject_swap' request.id %}" class="d-inline">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-danger btn-sm">
                                                         <i class="fas fa-times"></i>
@@ -147,10 +160,23 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h6 class="mb-1">{{ request.skill.title }}</h6>
-                                            <p class="mb-1 small text-muted">
-                                                To: {{ request.skill.user.username }}
-                                            </p>
+                                            <h6 class="mb-1 text-gray-800">You want to learn {{ request.skill_offered.name }}</h6>
+                                            <div class="space-y-1">
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Offered Skill:</span> {{ request.skill_requested.name }}
+                                                </p>
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Requested Skill:</span> {{ request.skill_offered.name }}
+                                                </p>
+                                                <p class="mb-1 small text-gray-600">
+                                                    <span class="font-medium">Proposed Time:</span> {{ request.proposed_time|date:"F j, Y, g:i a" }}
+                                                </p>
+                                                {% if request.message %}
+                                                    <p class="mb-1 small text-gray-600">
+                                                        <span class="font-medium">Message:</span> {{ request.message }}
+                                                    </p>
+                                                {% endif %}
+                                            </div>
                                             <span class="badge bg-{{ request.status_color }}">
                                                 {{ request.get_status_display }}
                                             </span>
