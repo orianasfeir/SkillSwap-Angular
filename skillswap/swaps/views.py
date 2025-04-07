@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from .models import SkillSwapRequest
 from users.models import User
 from skills.models import Skill
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 
 @login_required
 def create_swap_request(request, user_id, skill_id):
@@ -52,3 +54,22 @@ def reject_swap(request, swap_id):
     swap.status = 'rejected'
     swap.save()
     return redirect('swaps:swap_list')
+
+@login_required
+def complete_swap(request, swap_id):
+    swap = get_object_or_404(SkillSwapRequest, id=swap_id)
+    
+    # Ensure the user is either the requester or the receiver
+    if request.user != swap.user_requesting and request.user != swap.user_requested:
+        raise PermissionDenied("You don't have permission to complete this swap.")
+    
+    # Only allow completing accepted swaps
+    if swap.status != 'accepted':
+        messages.error(request, "Only accepted swaps can be marked as completed.")
+        return redirect('users:dashboard')
+    
+    swap.status = 'completed'
+    swap.save()
+    
+    messages.success(request, "Swap marked as completed successfully!")
+    return redirect('users:dashboard')

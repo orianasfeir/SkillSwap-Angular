@@ -26,6 +26,7 @@ urlpatterns = [
     path('users/', include(('users.urls', 'users'), namespace='users')),
     path('skills/', include(('skills.urls', 'skills'), namespace='skills')),
     path('swaps/', include(('swaps.urls', 'swaps'), namespace='swaps')),
+    path('reviews/', include(('reviews.urls', 'reviews'), namespace='reviews')),
     
     path('skills/add/', skill_views.add_skill, name='add_skill'),
 ]

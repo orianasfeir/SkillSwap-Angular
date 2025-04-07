@@ -5,6 +5,7 @@ from .models import Qualification
 from .forms import CustomUserCreationForm, ProfileEditForm, QualificationForm
 from skills.models import UserSkill
 from reviews.models import Review
+from django.db import models
 
 def register(request):
     if request.method == 'POST':
@@ -61,13 +62,25 @@ def dashboard(request):
     user = request.user
     profile = user.profile
     skills = user.skills.all()
-    reviews = user.reviews_received.all()
+    # Get all reviews where user is either the reviewer or the one being reviewed
+    reviews = Review.objects.filter(models.Q(reviewer=user) | models.Q(user_reviewed=user)).select_related('reviewer', 'user_reviewed')
+    print(f"Found {reviews.count()} reviews for user {user.username}")
+    for review in reviews:
+        print(f"Review: {review.text} by {review.reviewer.username} for {review.user_reviewed.username}")
     swap_requests = user.requests_received.filter(status='pending')
+    active_swaps = user.requests_received.filter(status='accepted')
+    completed_swaps = user.requests_received.filter(status='completed')
+    
+    # Add review information to completed swaps
+    for swap in completed_swaps:
+        swap.review = Review.objects.filter(swap_request=swap).first()
     
     context = {
         'profile': profile,
         'skills': skills,
         'reviews': reviews,
         'swap_requests': swap_requests,
+        'active_swaps': active_swaps,
+        'completed_swaps': completed_swaps,
     }
     return render(request, 'users/dashboard.html', context)

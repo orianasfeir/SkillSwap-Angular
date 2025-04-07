@@ -142,8 +142,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p class="mb-0 text-white-50">{{ review.comment }}</p>
-                                <small class="text-white-50">{{ review.created_at|timesince }} ago</small>
+                                <p class="mb-0">{{ review.text }}</p>
+                                <small>{{ review.created_at|timesince }} ago</small>
                             </div>
                         {% endfor %}
                     </div>
@@ -154,7 +154,7 @@
         </div>
 
         <!-- Pending Swap Requests Section -->
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
                 <h3 class="text-center text-white">Pending Swap Requests</h3>
             </div>
@@ -184,6 +184,86 @@
                 {% else %}
                     <p class="text-white-50 text-center">No pending swap requests.</p>
                 {% endif %}
+            </div>
+        </div>
+
+        <!-- Active and Completed Swaps Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center text-white">My Skill Swaps</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#active-swaps">
+                            Active Swaps
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#completed-swaps">
+                            Completed Swaps
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Active Swaps Tab -->
+                    <div class="tab-pane fade show active" id="active-swaps">
+                        {% if active_swaps %}
+                            <div class="list-group">
+                                {% for swap in active_swaps %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">{{ swap.user_requesting.username }}</h5>
+                                                <p class="mb-1">Teaching you: {{ swap.skill_requested.name }}</p>
+                                                <p class="mb-1">You're teaching: {{ swap.skill_offered.name }}</p>
+                                                <small class="text-muted">Started: {{ swap.created_at|date:"M d, Y" }}</small>
+                                            </div>
+                                            <form method="post" action="{% url 'swaps:complete_swap' swap.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-primary">Mark as Completed</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-white-50 text-center">No active swaps.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Completed Swaps Tab -->
+                    <div class="tab-pane fade" id="completed-swaps">
+                        {% if completed_swaps %}
+                            <div class="list-group">
+                                {% for swap in completed_swaps %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">{{ swap.user_requesting.username }}</h5>
+                                                <p class="mb-1">You learned: {{ swap.skill_requested.name }}</p>
+                                                <p class="mb-1">You taught: {{ swap.skill_offered.name }}</p>
+                                                <small class="text-muted">Completed: {{ swap.updated_at|date:"M d, Y" }}</small>
+                                            </div>
+                                            <div>
+                                                {% if not swap.review %}
+                                                    <a href="{% url 'reviews:create_review' swap.id %}" class="btn btn-sm btn-primary">
+                                                        Add Review
+                                                    </a>
+                                                {% else %}
+                                                    <span class="badge bg-success">Reviewed</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-white-50 text-center">No completed swaps.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -224,4 +304,31 @@ function confirmDelete(skillId, skillName) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>
+
+<style>
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating input {
+    display: none;
+}
+
+.rating label {
+    cursor: pointer;
+    padding: 0 0.1em;
+    font-size: 1.5em;
+}
+
+.rating input:checked ~ label {
+    color: #ffd700;
+}
+
+.rating label:hover,
+.rating label:hover ~ label {
+    color: #ffd700;
+}
+</style>
 {% endblock %} 
