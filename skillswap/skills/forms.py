@@ -5,7 +5,7 @@ from users.models import Qualification
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = Qualification
-        fields = ['qualification_image', 'description']
+        fields = ['description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }

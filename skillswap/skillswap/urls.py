@@ -25,13 +25,9 @@ urlpatterns = [
     
     path('users/', include(('users.urls', 'users'), namespace='users')),
     path('skills/', include(('skills.urls', 'skills'), namespace='skills')),
+    path('swaps/', include(('swaps.urls', 'swaps'), namespace='swaps')),
     
     path('skills/add/', skill_views.add_skill, name='add_skill'),
-
-    path('swaps/', swap_views.swap_requests, name='swap_list'),
-    path('swaps/create/<int:user_id>/<int:skill_id>/', swap_views.create_swap_request, name='create_swap_request'),
-    path('swaps/accept/<int:swap_id>/', swap_views.accept_swap, name='accept_swap'),
-    path('swaps/reject/<int:swap_id>/', swap_views.reject_swap, name='reject_swap'),
 ]
 
 if settings.DEBUG:

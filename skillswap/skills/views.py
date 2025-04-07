@@ -19,7 +19,9 @@ def add_skill(request):
             
             # Create and associate the qualification if provided
             if qualification_form.cleaned_data.get('qualification_image') or qualification_form.cleaned_data.get('description'):
-                qualification = qualification_form.save()
+                qualification = qualification_form.save(commit=False)
+                qualification.user = request.user
+                qualification.save()
                 user_skill.qualifications.add(qualification)
             
             messages.success(request, 'Skill added successfully!')
@@ -90,6 +92,17 @@ def skill_detail(request, skill_id):
     skill = get_object_or_404(Skill, id=skill_id)
     user_has_skill = UserSkill.objects.filter(user=request.user, skill=skill).exists()
     
+    # Get all users offering this skill with their qualifications
+    users_offering = UserSkill.objects.filter(
+        skill=skill
+    ).exclude(
+        user=request.user  # Exclude current user
+    ).select_related(
+        'user'
+    ).prefetch_related(
+        'qualifications'
+    )
+    
     # Get reviews through swap requests where this skill was involved
     reviews = Review.objects.filter(
         swap_request__skill_requested=skill
@@ -98,6 +111,7 @@ def skill_detail(request, skill_id):
     context = {
         'skill': skill,
         'user_has_skill': user_has_skill,
+        'users_offering': users_offering,
         'reviews': reviews,
     }
     return render(request, 'skills/skill_detail.html', context)

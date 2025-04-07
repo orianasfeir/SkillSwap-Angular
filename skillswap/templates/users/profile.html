@@ -8,11 +8,19 @@
     <div class="col-md-4">
         <div class="card mb-4">
             <div class="card-body text-center">
-                <img src="{{ profile_user.profile_image.url|default:'https://placehold.co/150x150' }}" 
-                     alt="{{ profile_user.username }}" 
-                     class="rounded-circle mb-3" 
-                     width="150" 
-                     height="150">
+                {% if profile_user.profile_image %}
+                    <img src="{{ profile_user.profile_image.url }}" 
+                         alt="{{ profile_user.username }}" 
+                         class="rounded-circle mb-3" 
+                         width="150" 
+                         height="150">
+                {% else %}
+                    <img src="https://placehold.co/150x150" 
+                         alt="{{ profile_user.username }}" 
+                         class="rounded-circle mb-3" 
+                         width="150" 
+                         height="150">
+                {% endif %}
                 <h3 class="card-title text-white">{{ profile_user.username }}</h3>
                 
                 {% if profile_user.about %}

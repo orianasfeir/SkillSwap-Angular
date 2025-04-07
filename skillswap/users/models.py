@@ -53,7 +53,6 @@ def save_user_profile(sender, instance, **kwargs):
 
 class Qualification(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='qualifications')
-    qualification_image = models.ImageField(upload_to='qualifications/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

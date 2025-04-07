@@ -44,18 +44,7 @@
                                         {{ field.label }}
                                     </label>
                                     <div class="mt-1">
-                                        {% if field.name == 'qualification_image' %}
-                                            <div class="flex items-center space-x-4">
-                                                <div class="flex-1">
-                                                    {{ field }}
-                                                </div>
-                                                <div class="preview-container hidden">
-                                                    <img id="preview" class="h-12 w-12 object-cover rounded" src="#" alt="Preview">
-                                                </div>
-                                            </div>
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
+                                        {{ field }}
                                     </div>
                                     {% if field.help_text %}
                                         <p class="mt-1 text-sm text-gray-300">{{ field.help_text }}</p>

@@ -17,7 +17,7 @@ class ProfileEditForm(forms.ModelForm):
     
     class Meta:
         model = User
-        fields = ['email', 'phone', 'profile_image', 'about']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'about', 'profile_image']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
@@ -27,4 +27,7 @@ class ProfileEditForm(forms.ModelForm):
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = Qualification
-        fields = ['qualification_image', 'description']
+        fields = ['description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }

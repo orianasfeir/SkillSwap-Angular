@@ -39,11 +39,11 @@
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">{{ skill.name }}</h5>
-                    <p class="card-text">{{ skill.description|truncatewords:20 }}</p>
+                    <h5 class="card-title text-light">{{ skill.name }}</h5>
+                    <p class="card-text text-light">{{ skill.description|truncatewords:20 }}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">
-                            <i class="fas fa-clock me-1"></i>{{ skill.created_at|timesince }} ago
+                        <span class="text-white">
+                            <i class="fas fa-clock me-1 text-white"></i>{{ skill.created_at|timesince }} ago
                         </span>
                     </div>
                 </div>
