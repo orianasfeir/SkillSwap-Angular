@@ -22,12 +22,15 @@ def register(request):
 def profile(request):
     profile_user = request.user
     user_skills = UserSkill.objects.filter(user=profile_user).select_related('skill')
+    # Calculate the divided proficiency level for each skill
+    for skill in user_skills:
+        skill.divided_proficiency = skill.proficiency_level // 2 if skill.proficiency_level else 0
     reviews = Review.objects.filter(user_reviewed=profile_user).select_related('reviewer')
     completed_swaps = profile_user.requests_received.filter(status='completed')
     
     context = {
         'profile_user': profile_user,
-        'skills': [user_skill.skill for user_skill in user_skills],
+        'skills': user_skills,
         'reviews': reviews,
         'completed_swaps': completed_swaps
     }
@@ -67,7 +70,9 @@ def dashboard(request):
     print(f"Found {reviews.count()} reviews for user {user.username}")
     for review in reviews:
         print(f"Review: {review.text} by {review.reviewer.username} for {review.user_reviewed.username}")
-    swap_requests = user.requests_received.filter(status='pending')
+    # Get both incoming and outgoing pending requests
+    incoming_requests = user.requests_received.filter(status='pending')
+    outgoing_requests = user.requests_made.filter(status='pending')
     active_swaps = user.requests_received.filter(status='accepted')
     completed_swaps = user.requests_received.filter(status='completed')
     
@@ -79,7 +84,8 @@ def dashboard(request):
         'profile': profile,
         'skills': skills,
         'reviews': reviews,
-        'swap_requests': swap_requests,
+        'incoming_requests': incoming_requests,
+        'outgoing_requests': outgoing_requests,
         'active_swaps': active_swaps,
         'completed_swaps': completed_swaps,
     }

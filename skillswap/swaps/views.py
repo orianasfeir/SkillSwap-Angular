@@ -43,17 +43,41 @@ def swap_requests(request):
 
 @login_required
 def accept_swap(request, swap_id):
-    swap = get_object_or_404(SkillSwapRequest, pk=swap_id, user_requested=request.user)
-    swap.status = 'accepted'
-    swap.save()
-    return redirect('swaps:swap_list')
+    swap_request = get_object_or_404(SkillSwapRequest, id=swap_id)
+    
+    # Check if the user is the one being requested
+    if swap_request.user_requested != request.user:
+        messages.error(request, "You can only accept requests made to you.")
+        return redirect('users:dashboard')
+    
+    # Only allow accepting pending requests
+    if swap_request.status != 'pending':
+        messages.error(request, "You can only accept pending swap requests.")
+        return redirect('users:dashboard')
+    
+    swap_request.status = 'accepted'
+    swap_request.save()
+    messages.success(request, "Swap request accepted successfully.")
+    return redirect('users:dashboard')
 
 @login_required
 def reject_swap(request, swap_id):
-    swap = get_object_or_404(SkillSwapRequest, pk=swap_id, user_requested=request.user)
-    swap.status = 'rejected'
-    swap.save()
-    return redirect('swaps:swap_list')
+    swap_request = get_object_or_404(SkillSwapRequest, id=swap_id)
+    
+    # Check if the user is the one being requested
+    if swap_request.user_requested != request.user:
+        messages.error(request, "You can only reject requests made to you.")
+        return redirect('users:dashboard')
+    
+    # Only allow rejecting pending requests
+    if swap_request.status != 'pending':
+        messages.error(request, "You can only reject pending swap requests.")
+        return redirect('users:dashboard')
+    
+    swap_request.status = 'rejected'
+    swap_request.save()
+    messages.success(request, "Swap request rejected successfully.")
+    return redirect('users:dashboard')
 
 @login_required
 def complete_swap(request, swap_id):
@@ -72,4 +96,23 @@ def complete_swap(request, swap_id):
     swap.save()
     
     messages.success(request, "Swap marked as completed successfully!")
+    return redirect('users:dashboard')
+
+@login_required
+def cancel_swap(request, swap_id):
+    swap_request = get_object_or_404(SkillSwapRequest, id=swap_id)
+    
+    # Check if the user is the one who made the request
+    if swap_request.user_requesting != request.user:
+        messages.error(request, "You can only cancel your own swap requests.")
+        return redirect('users:dashboard')
+    
+    # Only allow canceling pending requests
+    if swap_request.status != 'pending':
+        messages.error(request, "You can only cancel pending swap requests.")
+        return redirect('users:dashboard')
+    
+    # Delete the swap request
+    swap_request.delete()
+    messages.success(request, "Swap request cancelled successfully.")
     return redirect('users:dashboard')

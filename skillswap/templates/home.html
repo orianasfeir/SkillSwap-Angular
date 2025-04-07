@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - SkillSwap{% endblock %}
 
@@ -26,7 +27,8 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <img src="https://placehold.co/600x400" alt="SkillSwap Illustration" class="img-fluid rounded-3">
+            <img src="{% static 'home_image.png' %}" height="400" width="400" alt="SkillSwap Illustration"
+                class="img-fluid rounded-3">
         </div>
     </div>
 </section>
@@ -101,10 +103,10 @@
             <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="https://placehold.co/50x50"
-                            alt="{{ review.reviewer.username }}" class="rounded-circle me-3" width="50" height="50">
+                        <img src="{{ review.reviewer.profile_image.url|default:'https://placehold.co/40x40' }}"
+                            alt="{{ review.reviewer.username }}" class="rounded-circle me-3" width="40" height="40">
                         <div>
-                            <h6 class="mb-0">{{ review.reviewer.username }}</h6>
+                            <h6 class="mb-0 text-white">{{ review.reviewer.username }}</h6>
                             <div class="text-warning">
                                 {% for i in "12345"|make_list %}
                                 {% if forloop.counter <= review.rating %} <i class="fas fa-star"></i>
@@ -115,7 +117,7 @@
                             </div>
                         </div>
                     </div>
-                    <p class="card-text">{{ review.comment|truncatewords:30 }}</p>
+                    <p class="card-text">{{ review.text|truncatewords:30 }}</p>
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load skill_filters %}
 
 {% block title %}{{ profile_user.username }}'s Profile - SkillSwap{% endblock %}
 
@@ -85,13 +86,13 @@
                         <div class="col-md-6">
                             <div class="card h-100">
                                 <div class="card-body">
-                                    <h6 class="card-title text-white">{{ skill.name }}</h6>
-                                    <p class="card-text small text-white-50">{{ skill.description|truncatewords:15 }}</p>
+                                    <h6 class="card-title text-white">{{ skill.skill.name }}</h6>
+                                    <p class="card-text small text-white-50">{{ skill.skill.description|truncatewords:15 }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-primary">{{ skill.is_featured|yesno:"Featured,Standard" }}</span>
+                                        <span class="badge bg-primary">{{ skill.skill.is_featured|yesno:"Featured,Standard" }}</span>
                                         <div class="text-warning">
                                             {% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= skill.rating %}
+                                                {% if forloop.counter <= skill.divided_proficiency %}
                                                     <i class="fas fa-star"></i>
                                                 {% else %}
                                                     <i class="far fa-star"></i>
@@ -101,7 +102,7 @@
                                     </div>
                                 </div>
                                 <div class="card-footer bg-transparent border-0">
-                                    <a href="{% url 'skills:skill_detail' skill.id %}" class="btn btn-outline-primary w-100">
+                                    <a href="{% url 'skills:skill_detail' skill.skill.id %}" class="btn btn-outline-primary w-100">
                                         View Details
                                     </a>
                                 </div>
@@ -117,7 +118,7 @@
         </div>
         
         <!-- Reviews Section -->
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0 text-white">Reviews</h5>
             </div>
@@ -132,6 +133,9 @@
                                  height="40">
                             <div>
                                 <h6 class="mb-0 text-white">{{ review.reviewer.username }}</h6>
+                                <p class="text-white-50 mb-1">
+                                    Reviewed {{ review.user_reviewed.username }} for {{ review.swap_request.skill_requested.name }}
+                                </p>
                                 <div class="text-warning">
                                     {% for i in "12345"|make_list %}
                                         {% if forloop.counter <= review.rating %}
@@ -143,7 +147,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="card-text text-white">{{ review.comment }}</p>
+                        <p class="card-text text-white">{{ review.text }}</p>
                         <small class="text-white-50">{{ review.created_at|timesince }} ago</small>
                     </div>
                 {% empty %}

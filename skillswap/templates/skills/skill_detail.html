@@ -52,7 +52,7 @@
                             
                             {% if user_skill.qualifications.all %}
                                 <div class="mb-3">
-                                    <h4 class="text-sm font-semibold mb-2">Qualifications:</h4>
+                                    <h6 class="text-white">Qualifications:</h6>
                                     {% for qualification in user_skill.qualifications.all %}
                                         <div class="text-sm text-gray-600 mb-2">
                                             {{ qualification.description }}
@@ -64,7 +64,7 @@
                                 </div>
                             {% endif %}
                             
-                            <a href="{% url 'swaps:request_swap' user_skill.user.id skill.id %}" 
+                            <a href="{% url 'swaps:create_swap' user_skill.user.id skill.id %}" 
                                class="btn btn-primary w-full">
                                 Request Skill Swap
                             </a>
@@ -81,18 +81,26 @@
             {% for review in reviews %}
                 <div class="border rounded p-4 mb-2">
                     <div class="mb-2">
-                        <p class="font-semibold">{{ review.reviewer.username }}</p>
-                        <div class="flex">
-                            {% for i in "12345"|make_list %}
-                                {% if forloop.counter <= review.rating %}
-                                    <span class="text-yellow-400">★</span>
-                                {% else %}
-                                    <span class="text-gray-300">★</span>
-                                {% endif %}
-                            {% endfor %}
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold">{{ review.reviewer.username }}</p>
+                                <p class="text-sm text-gray-500">
+                                    Reviewed {{ review.user_reviewed.username }} for {{ review.swap_request.skill_requested.name }}
+                                </p>
+                            </div>
+                            <div class="flex">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <span class="text-yellow-400">★</span>
+                                    {% else %}
+                                        <span class="text-gray-300">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                     <p class="text-gray-600">{{ review.text }}</p>
+                    <small class="text-gray-500">{{ review.created_at|timesince }} ago</small>
                 </div>
             {% empty %}
                 <p class="text-gray-600">No reviews yet.</p>
