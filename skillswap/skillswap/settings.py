@@ -84,8 +84,8 @@ DATABASES = {
         'NAME': 'skillswap',
         'USER': 'postgres',
         'PASSWORD': 'rootpass',
-        # 'PASSWORD': '1234',
-        'HOST': 'localhost',
+        'PASSWORD': '1234',
+        # 'HOST': 'localhost',
         'PORT': '5432',
     }
 }
