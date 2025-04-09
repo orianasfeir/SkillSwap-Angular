@@ -126,7 +126,7 @@
                 {% for review in reviews %}
                     <div class="mb-4 pb-4 border-bottom border-secondary">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="{{ review.reviewer.profile_image.url|default:'https://placehold.co/40x40' }}" 
+                            <img src="{% if review.reviewer.profile_image %}{{ review.reviewer.profile_image.url }}{% else %}https://placehold.co/40x40{% endif %}" 
                                  alt="{{ review.reviewer.username }}" 
                                  class="rounded-circle me-3" 
                                  width="40" 

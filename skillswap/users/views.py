@@ -73,8 +73,8 @@ def dashboard(request):
     # Get both incoming and outgoing pending requests
     incoming_requests = user.requests_received.filter(status='pending')
     outgoing_requests = user.requests_made.filter(status='pending')
-    active_swaps = user.requests_received.filter(status='accepted')
-    completed_swaps = user.requests_received.filter(status='completed')
+    active_swaps = user.requests_received.filter(status='accepted') | user.requests_made.filter(status='accepted')
+    completed_swaps = user.requests_received.filter(status='completed') | user.requests_made.filter(status='completed')
     
     # Add review information to completed swaps
     for swap in completed_swaps:

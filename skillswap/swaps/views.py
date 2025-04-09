@@ -10,13 +10,13 @@ from django.contrib import messages
 def create_swap_request(request, user_id, skill_id):
     if request.method == 'POST':
         requested_user = get_object_or_404(User, pk=user_id)
-        offered_skill = get_object_or_404(Skill, pk=skill_id)
+        requested_skill = get_object_or_404(Skill, pk=skill_id)
         
         swap = SkillSwapRequest(
             user_requesting=request.user,
             user_requested=requested_user,
-            skill_offered=offered_skill,
-            skill_requested=get_object_or_404(Skill, pk=request.POST.get('skill_requested')),
+            skill_offered=get_object_or_404(Skill, pk=request.POST.get('skill_offered')),
+            skill_requested=requested_skill,
             proposed_time=request.POST.get('proposed_time'),
             status='pending'
         )
@@ -24,11 +24,11 @@ def create_swap_request(request, user_id, skill_id):
         return redirect('swaps:swap_list')
     
     requested_user = get_object_or_404(User, pk=user_id)
-    offered_skill = get_object_or_404(Skill, pk=skill_id)
+    requested_skill = get_object_or_404(Skill, pk=skill_id)
     available_skills = request.user.skills.all()
     return render(request, 'swaps/create_request.html', {
         'requested_user': requested_user,
-        'offered_skill': offered_skill,
+        'requested_skill': requested_skill,
         'skills': available_skills
     })
 

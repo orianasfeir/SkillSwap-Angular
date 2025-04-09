@@ -15,7 +15,7 @@ class Skill(models.Model):
 
 class UserSkill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='skills')
-    skill = models.ForeignKey('Skill', on_delete=models.CASCADE)
+    skill = models.ForeignKey('Skill', on_delete=models.CASCADE, related_name='skill')
     proficiency_level = models.IntegerField(blank=True, null=True)
     qualifications = models.ManyToManyField(Qualification, blank=True, related_name='user_skills')
 

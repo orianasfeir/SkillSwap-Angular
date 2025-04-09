@@ -11,15 +11,13 @@
 
             <div class="mb-8">
                 <h2 class="text-xl font-semibold mb-4 text-white">Skill Details</h2>
-                <div class="p-4 bg-gray-600 rounded-lg">
+                <div class="bg-gray-600 rounded-lg">
                     <div class="text-white space-y-2">
                         <div class="flex items-center gap-2">
-                            <p class="font-medium">Requesting from:</p>
-                            <p>{{ requested_user.username }}</p>
+                            <p class="font-medium">Requesting from : &nbsp;{{ requested_user.username }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <p class="font-medium">Skill name:</p>
-                            <p>{{ offered_skill.name }}</p>
+                            <p class="font-medium">Skill name : &nbsp;{{ requested_skill.name }}</p>
                         </div>
                     </div>
                 </div>
@@ -29,35 +27,35 @@
                 {% csrf_token %}
 
                 <div>
-                    <label for="skill_requested" class="block text-lg font-medium text-white mb-2">
-                        Select a skill to offer in exchange
+                    <label for="skill_offered" class="block text-lg font-medium text-white mb-2">
+                        Select a skill to offer in exchange:
                     </label>
-                    <select name="skill_requested" id="skill_requested"
-                        class="w-full px-4 py-2 text-lg bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="skill_offered" id="skill_offered"
+                        class="w-full text-lg bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         {% for skill in skills %}
-                        <option value="{{ skill.id }}">{{ skill.name }}</option>
+                        <option value="{{ skill.skill.id }}">{{ skill.skill.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div>
+                <div class="mt-4">
                     <label for="proposed_time" class="block text-lg font-medium text-white mb-2">
-                        Proposed Time
+                        Proposed Time:
                     </label>
                     <input type="datetime-local" name="proposed_time" id="proposed_time" required
                         class="w-full px-4 py-2 text-lg bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
-                <div>
+                <div class="mt-4 d-flex align-items-center">
                     <label for="message" class="block text-lg font-medium text-white mb-2">
-                        Message (optional)
+                        Message (optional):
                     </label>
                     <textarea name="message" id="message" rows="4"
-                        class="w-full h-[40px] px-4 py-2 text-lg bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        class="h-[40px] px-4 py-2 mx-2 text-lg bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
-                <div class="flex justify-end space-x-4 mt-8">
-                    <a href="{% url 'skills:skill_detail' offered_skill.id %}" class="btn btn-outline-secondary">
+                <div class="flex justify-end space-x-4 mt-4">
+                    <a href="{% url 'skills:skill_detail' requested_skill.id %}" class="btn btn-outline-secondary">
                         Cancel
                     </a>
                     <button type="submit" class="btn btn-primary">

@@ -103,7 +103,7 @@
             <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="{{ review.reviewer.profile_image.url|default:'https://placehold.co/40x40' }}"
+                        <img src="{% if review.reviewer.profile_image %}{{ review.reviewer.profile_image.url }}{% else %}https://placehold.co/40x40{% endif %}"
                             alt="{{ review.reviewer.username }}" class="rounded-circle me-3" width="40" height="40">
                         <div>
                             <h6 class="mb-0 text-white">{{ review.reviewer.username }}</h6>
