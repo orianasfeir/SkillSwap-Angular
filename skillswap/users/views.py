@@ -6,6 +6,15 @@ from .forms import CustomUserCreationForm, ProfileEditForm, QualificationForm
 from skills.models import UserSkill
 from reviews.models import Review
 from django.db import models
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import User
+from .serializers import (
+    UserSerializer, UserCreateSerializer, UserUpdateSerializer,
+    QualificationSerializer
+)
+from django.db.models import Q
 
 def register(request):
     if request.method == 'POST':
@@ -90,3 +99,93 @@ def dashboard(request):
         'completed_swaps': completed_swaps,
     }
     return render(request, 'users/dashboard.html', context)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return UserUpdateSerializer
+        return UserSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        login(request, user)
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'])
+    def profile(self, request):
+        user = request.user
+        user_skills = UserSkill.objects.filter(user=user).select_related('skill')
+        for skill in user_skills:
+            skill.divided_proficiency = skill.proficiency_level // 2 if skill.proficiency_level else 0
+        
+        reviews = Review.objects.filter(user_reviewed=user).select_related('reviewer')
+        completed_swaps = user.requests_received.filter(status='completed')
+        
+        data = {
+            'user': UserSerializer(user).data,
+            'skills': [{'id': skill.id, 'name': skill.skill.name, 'proficiency': skill.divided_proficiency} 
+                      for skill in user_skills],
+            'reviews': [{'id': review.id, 'text': review.text, 'rating': review.rating,
+                        'reviewer': review.reviewer.username} for review in reviews],
+            'completed_swaps': [{'id': swap.id, 'skill': swap.skill_requested.name} 
+                               for swap in completed_swaps]
+        }
+        return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        user = request.user
+        profile = user.profile
+        skills = user.skills.all()
+        
+        reviews = Review.objects.filter(
+            Q(reviewer=user) | Q(user_reviewed=user)
+        ).select_related('reviewer', 'user_reviewed')
+        
+        incoming_requests = user.requests_received.filter(status='pending')
+        outgoing_requests = user.requests_made.filter(status='pending')
+        active_swaps = user.requests_received.filter(status='accepted') | user.requests_made.filter(status='accepted')
+        completed_swaps = user.requests_received.filter(status='completed') | user.requests_made.filter(status='completed')
+        
+        for swap in completed_swaps:
+            swap.review = Review.objects.filter(swap_request=swap).first()
+        
+        data = {
+            'profile': UserSerializer(user).data,
+            'skills': [{'id': skill.id, 'name': skill.skill.name} for skill in skills],
+            'reviews': [{'id': review.id, 'text': review.text, 'rating': review.rating,
+                        'reviewer': review.reviewer.username} for review in reviews],
+            'incoming_requests': [{'id': req.id, 'skill': req.skill_requested.name} 
+                                for req in incoming_requests],
+            'outgoing_requests': [{'id': req.id, 'skill': req.skill_requested.name} 
+                                for req in outgoing_requests],
+            'active_swaps': [{'id': swap.id, 'skill': swap.skill_requested.name} 
+                            for swap in active_swaps],
+            'completed_swaps': [{'id': swap.id, 'skill': swap.skill_requested.name,
+                               'review': swap.review.text if swap.review else None} 
+                               for swap in completed_swaps]
+        }
+        return Response(data)
+
+class QualificationViewSet(viewsets.ModelViewSet):
+    serializer_class = QualificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Qualification.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

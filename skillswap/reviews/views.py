@@ -5,6 +5,11 @@ from .models import Review
 from .forms import ReviewForm
 from swaps.models import SkillSwapRequest
 from django.core.exceptions import PermissionDenied
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.db.models import Avg
+from .serializers import ReviewSerializer, ReviewCreateSerializer
 
 # Create your views here.
 
@@ -44,3 +49,54 @@ def create_review(request, swap_id):
         'form': form,
         'swap': swap
     })
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.filter(
+            user_reviewed=self.request.user
+        ).select_related('reviewer', 'user_reviewed', 'swap_request')
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ReviewCreateSerializer
+        return ReviewSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=False, methods=['get'])
+    def user_reviews(self, request):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response(
+                {'error': 'user_id parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        reviews = Review.objects.filter(user_reviewed_id=user_id).select_related(
+            'reviewer', 'user_reviewed', 'swap_request'
+        )
+        serializer = self.get_serializer(reviews, many=True)
+        
+        # Calculate average rating
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+        
+        return Response({
+            'reviews': serializer.data,
+            'average_rating': round(avg_rating, 1)
+        })
+
+    @action(detail=False, methods=['get'])
+    def my_reviews(self, request):
+        reviews = Review.objects.filter(reviewer=request.user).select_related(
+            'user_reviewed', 'swap_request'
+        )
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
