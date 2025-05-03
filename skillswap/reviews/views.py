@@ -53,9 +53,10 @@ def create_review(request, swap_id):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Review.objects.all()
 
     def get_queryset(self):
-        return Review.objects.filter(
+        return self.queryset.filter(
             user_reviewed=self.request.user
         ).select_related('reviewer', 'user_reviewed', 'swap_request')
 
@@ -80,7 +81,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        reviews = Review.objects.filter(user_reviewed_id=user_id).select_related(
+        reviews = self.queryset.filter(user_reviewed_id=user_id).select_related(
             'reviewer', 'user_reviewed', 'swap_request'
         )
         serializer = self.get_serializer(reviews, many=True)
@@ -95,7 +96,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def my_reviews(self, request):
-        reviews = Review.objects.filter(reviewer=request.user).select_related(
+        reviews = self.queryset.filter(reviewer=request.user).select_related(
             'user_reviewed', 'swap_request'
         )
         serializer = self.get_serializer(reviews, many=True)

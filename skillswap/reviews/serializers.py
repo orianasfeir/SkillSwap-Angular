@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Review
 from users.serializers import UserSerializer
 from swaps.serializers import SkillSwapRequestSerializer
+from users.models import User
+from swaps.models import SkillSwapRequest
 
 class ReviewSerializer(serializers.ModelSerializer):
     reviewer = UserSerializer(read_only=True)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Skill, UserSkill
 from users.serializers import QualificationSerializer
+from users.models import User, Qualification
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +17,7 @@ class UserSkillSerializer(serializers.ModelSerializer):
     )
     qualifications = QualificationSerializer(many=True, read_only=True)
     qualification_ids = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.get_queryset().qualifications.all(),
+        queryset=Qualification.objects.all(),
         source='qualifications',
         many=True,
         write_only=True,

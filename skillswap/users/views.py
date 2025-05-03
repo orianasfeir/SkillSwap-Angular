@@ -73,7 +73,7 @@ def add_qualification(request):
 def dashboard(request):
     user = request.user
     profile = user.profile
-    skills = user.skills.all()
+    skills = user.user_skills.all()
     # Get all reviews where user is either the reviewer or the one being reviewed
     reviews = Review.objects.filter(models.Q(reviewer=user) | models.Q(user_reviewed=user)).select_related('reviewer', 'user_reviewed')
     print(f"Found {reviews.count()} reviews for user {user.username}")
@@ -149,7 +149,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def dashboard(self, request):
         user = request.user
         profile = user.profile
-        skills = user.skills.all()
+        skills = user.user_skills.all()
         
         reviews = Review.objects.filter(
             Q(reviewer=user) | Q(user_reviewed=user)
