@@ -7,7 +7,7 @@ from skills.models import UserSkill
 from reviews.models import Review
 from django.db import models
 from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from .models import User
 from .serializers import (
@@ -15,6 +15,9 @@ from .serializers import (
     QualificationSerializer
 )
 from django.db.models import Q
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
 
 def register(request):
     if request.method == 'POST':
@@ -121,8 +124,21 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        login(request, user)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'token': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            }
+        }, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
     def profile(self, request):
@@ -189,3 +205,36 @@ class QualificationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_api(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response(
+            {'error': 'Please provide both username and password'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    user = authenticate(username=username, password=password)
+    
+    if user is not None:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'token': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            }
+        })
+    else:
+        return Response(
+            {'error': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )

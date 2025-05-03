@@ -10,6 +10,7 @@ app_name = 'users'
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('api/login/', views.login_api, name='login_api'),
     # Keep old URLs for reference during Angular development
     path('dashboard/', views.dashboard, name='dashboard'),
     path('profile/', views.profile, name='profile'),

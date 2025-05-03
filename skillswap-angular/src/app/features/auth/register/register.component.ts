@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
@@ -51,6 +54,14 @@ import { AuthService } from '../../../core/services/auth.service';
           <div *ngIf="error" class="text-red-500 text-sm text-center">
             {{ error }}
           </div>
+          
+          <div class="text-sm text-center">
+            <p>Already have an account? 
+              <a routerLink="/auth/login" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign in
+              </a>
+            </p>
+          </div>
         </form>
       </div>
     </div>
@@ -75,9 +86,14 @@ export class RegisterComponent {
     });
   }
 
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('password').value === g.get('confirmPassword').value
-      ? null : { mismatch: true };
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+    
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      return { mismatch: true };
+    }
+    return null;
   }
 
   onSubmit() {

@@ -12,10 +12,17 @@ export interface User {
   profile_image?: string;
 }
 
+export interface AuthResponse {
+  token: string;
+  refresh: string;
+  user: User;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private apiUrl = `${environment.apiUrl}`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -27,33 +34,43 @@ export class AuthService {
     }
   }
 
-  login(username: string, password: string): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/auth/login/`, { username, password })
-      .pipe(
-        tap(user => {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        })
-      );
+  login(credentials: { username: string; password: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login/`, credentials).pipe(
+      tap(response => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        }
+      })
+    );
   }
 
-  register(userData: any): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/auth/register/`, userData)
+  register(userData: any): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/users/`, userData)
       .pipe(
-        tap(user => {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          this.currentUserSubject.next(user);
+        tap(response => {
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('currentUser', JSON.stringify(response.user));
+            this.currentUserSubject.next(response.user);
+          }
         })
       );
   }
 
   logout(): void {
+    localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
   isAuthenticated(): boolean {
-    return !!this.currentUserSubject.value;
+    return !!localStorage.getItem('token');
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   getCurrentUser(): User | null {

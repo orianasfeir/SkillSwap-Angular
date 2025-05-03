@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg
 from .serializers import ReviewSerializer, ReviewCreateSerializer
+from users.models import User
 
 # Create your views here.
 
@@ -49,6 +50,20 @@ def create_review(request, swap_id):
         'form': form,
         'swap': swap
     })
+
+@login_required
+def user_reviews(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    reviews = Review.objects.filter(user_reviewed=user).select_related('reviewer')
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    
+    context = {
+        'reviews': reviews,
+        'user_being_reviewed': user,
+        'average_rating': round(avg_rating, 1)
+    }
+    
+    return render(request, 'reviews/user_reviews.html', context)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
@@ -36,8 +39,16 @@ import { AuthService } from '../../../core/services/auth.service';
             </button>
           </div>
 
-          <div *ngIf="error" class="text-red-500 text-sm text-center">
-            {{ error }}
+          <div *ngIf="errorMessage" class="text-red-500 text-sm text-center">
+            {{ errorMessage }}
+          </div>
+          
+          <div class="text-sm text-center">
+            <p>Don't have an account? 
+              <a routerLink="/auth/register" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign up now
+              </a>
+            </p>
           </div>
         </form>
       </div>
@@ -46,7 +57,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  error: string = '';
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -59,16 +70,16 @@ export class LoginComponent {
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.valid) {
       const { username, password } = this.loginForm.value;
-      this.authService.login(username, password).subscribe({
-        next: () => {
+      this.authService.login({ username, password }).subscribe({
+        next: (response) => {
           this.router.navigate(['/dashboard']);
         },
-        error: (err) => {
-          this.error = 'Invalid username or password';
-          console.error('Login error:', err);
+        error: (error) => {
+          console.error('Login error:', error);
+          this.errorMessage = 'Invalid username or password';
         }
       });
     }
