@@ -13,12 +13,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 router = DefaultRouter()
 router.register(r'users', user_views.UserViewSet)
 router.register(r'qualifications', user_views.QualificationViewSet, basename='qualification')
-router.register(r'skills', skill_views.SkillViewSet)
-router.register(r'user-skills', skill_views.UserSkillViewSet, basename='user-skill')
 
 urlpatterns = [
     # API endpoints
     path('api/', include(router.urls)),
+    path('api/skills/', include('skills.urls')),  # Include skills app URLs
     path('api-auth/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -43,11 +42,8 @@ urlpatterns = [
     
     # App URLs (keeping for reference during Angular development)
     path('users/', include(('users.urls', 'users'), namespace='users')),
-    path('skills/', include(('skills.urls', 'skills'), namespace='skills')),
     path('swaps/', include(('swaps.urls', 'swaps'), namespace='swaps')),
     path('reviews/', include(('reviews.urls', 'reviews'), namespace='reviews')),
-    
-    path('skills/add/', skill_views.add_skill, name='add_skill'),
 ]
 
 if settings.DEBUG:
