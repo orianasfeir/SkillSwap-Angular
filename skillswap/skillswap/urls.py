@@ -17,7 +17,7 @@ router.register(r'qualifications', user_views.QualificationViewSet, basename='qu
 urlpatterns = [
     # API endpoints
     path('api/', include(router.urls)),
-    path('api/skills/', include('skills.urls')),  # Include skills app URLs
+    path('api/', include('skills.urls')),  # Include skills app URLs
     path('api-auth/', include('rest_framework.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
