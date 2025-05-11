@@ -5,10 +5,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 import { EditProfileDialogComponent } from './edit-profile-dialog/edit-profile-dialog.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
-import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core/services/user.service';
+import { UserService, ProfileResponse } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -42,18 +42,22 @@ import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core
             </div>
 
             <!-- Content -->
-            <ng-container *ngIf="!isLoading && !error">
+            <ng-container *ngIf="!isLoading && !error && profileData">
               <!-- Profile Section -->
               <div class="mt-8">
                 <div class="bg-white shadow rounded-lg p-6">
                   <div class="flex items-center space-x-4">
-                    <img [src]="userProfile.profile_image || 'assets/default-avatar.png'"
+                    <img [src]="profileData.user.profile_image || 'assets/default-avatar.png'"
                          class="w-24 h-24 rounded-full object-cover"
                          alt="Profile picture">
                     <div class="flex-1">
-                      <h2 class="text-2xl font-bold">{{ userProfile.username }}</h2>
-                      <p class="text-gray-600">{{ userProfile.bio || 'No bio yet' }}</p>
-                      <p class="text-sm text-gray-500">Member since {{ userProfile.date_joined | date }}</p>
+                      <h2 class="text-2xl font-bold">{{ profileData.user.username }}</h2>
+                      <p class="text-gray-600">{{ profileData.user.about || 'No bio yet' }}</p>
+                      <p class="text-sm text-gray-500">Member since {{ profileData.user.created_at | date }}</p>
+                      <p class="text-sm text-gray-500" *ngIf="profileData.user.phone">
+                        <mat-icon class="align-middle text-gray-500">phone</mat-icon>
+                        {{ profileData.user.phone }}
+                      </p>
                     </div>
                     <button mat-raised-button
                             color="primary"
@@ -68,14 +72,22 @@ import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core
               <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Your Skills</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <mat-card *ngFor="let skill of userSkills" class="p-4">
+                  <mat-card *ngFor="let skill of profileData.skills" class="p-4">
                     <mat-card-content>
                       <h4 class="font-bold">{{ skill.name }}</h4>
-                      <p class="text-gray-600">Proficiency: {{ skill.proficiency }}/5</p>
-                      <p class="text-gray-600">Category: {{ skill.category }}</p>
+                      <div class="flex items-center mt-2">
+                        <div class="flex-1">
+                          <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" 
+                                 [style.width.%]="(skill.proficiency / 5) * 100">
+                            </div>
+                          </div>
+                        </div>
+                        <span class="ml-2 text-sm text-gray-600">{{ skill.proficiency }}/5</span>
+                      </div>
                     </mat-card-content>
                   </mat-card>
-                  <div *ngIf="userSkills.length === 0" class="text-gray-500 text-center col-span-full py-4">
+                  <div *ngIf="!profileData.skills?.length" class="text-gray-500 text-center col-span-full py-4">
                     No skills added yet
                   </div>
                 </div>
@@ -85,7 +97,7 @@ import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core
               <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Your Reviews</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <mat-card *ngFor="let review of userReviews" class="p-4">
+                  <mat-card *ngFor="let review of profileData.reviews" class="p-4">
                     <mat-card-content>
                       <div class="flex items-center mb-2">
                         <div class="flex text-yellow-400">
@@ -95,78 +107,28 @@ import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core
                             star
                           </mat-icon>
                         </div>
-                        <span class="ml-2 text-gray-600">{{ review.created_at | date }}</span>
                       </div>
                       <p class="text-gray-800">{{ review.text }}</p>
-                      <div class="flex items-center mt-2">
-                        <img [src]="review.reviewer.profile_image || 'assets/default-avatar.png'"
-                             class="w-6 h-6 rounded-full mr-2"
-                             alt="Reviewer">
-                        <p class="text-gray-600">- {{ review.reviewer.username }}</p>
-                      </div>
+                      <p class="text-sm text-gray-600 mt-2">- {{ review.reviewer }}</p>
                     </mat-card-content>
                   </mat-card>
-                  <div *ngIf="userReviews.length === 0" class="text-gray-500 text-center col-span-full py-4">
+                  <div *ngIf="!profileData.reviews?.length" class="text-gray-500 text-center col-span-full py-4">
                     No reviews yet
                   </div>
                 </div>
               </div>
 
-              <!-- Swap Requests Section -->
-              <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Pending Requests -->
-                <div>
-                  <h3 class="text-xl font-semibold mb-4">Pending Requests</h3>
-                  <div class="space-y-4">
-                    <mat-card *ngFor="let request of pendingRequests" class="p-4">
-                      <mat-card-content>
-                        <div class="flex justify-between items-start">
-                          <div>
-                            <p class="font-semibold">Offering: {{ request.skill_offered.name }}</p>
-                            <p class="text-gray-600">Requesting: {{ request.skill_requested.name }}</p>
-                            <p class="text-sm text-gray-500">{{ request.created_at | date }}</p>
-                            <p class="text-sm text-gray-500">
-                              From: {{ request.user_requesting.username }}
-                            </p>
-                          </div>
-                          <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                            Pending
-                          </span>
-                        </div>
-                      </mat-card-content>
-                    </mat-card>
-                    <div *ngIf="pendingRequests.length === 0" class="text-gray-500 text-center py-4">
-                      No pending requests
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Ongoing Requests -->
-                <div>
-                  <h3 class="text-xl font-semibold mb-4">Ongoing Requests</h3>
-                  <div class="space-y-4">
-                    <mat-card *ngFor="let request of ongoingRequests" class="p-4">
-                      <mat-card-content>
-                        <div class="flex justify-between items-start">
-                          <div>
-                            <p class="font-semibold">Offering: {{ request.skill_offered.name }}</p>
-                            <p class="text-gray-600">Requesting: {{ request.skill_requested.name }}</p>
-                            <p class="text-sm text-gray-500">{{ request.created_at | date }}</p>
-                            <p class="text-sm text-gray-500">
-                              With: {{ request.user_requesting.username === userProfile.username ? 
-                                     request.user_requested.username : 
-                                     request.user_requesting.username }}
-                            </p>
-                          </div>
-                          <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                            Ongoing
-                          </span>
-                        </div>
-                      </mat-card-content>
-                    </mat-card>
-                    <div *ngIf="ongoingRequests.length === 0" class="text-gray-500 text-center py-4">
-                      No ongoing requests
-                    </div>
+              <!-- Completed Swaps Section -->
+              <div class="mt-8">
+                <h3 class="text-xl font-semibold mb-4">Completed Swaps</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-card *ngFor="let swap of profileData.completed_swaps" class="p-4">
+                    <mat-card-content>
+                      <p class="text-gray-800">{{ swap.skill }}</p>
+                    </mat-card-content>
+                  </mat-card>
+                  <div *ngIf="!profileData.completed_swaps?.length" class="text-gray-500 text-center col-span-full py-4">
+                    No completed swaps yet
                   </div>
                 </div>
               </div>
@@ -178,18 +140,7 @@ import { UserService, UserProfile, Skill, Review, SwapRequest } from '../../core
   `
 })
 export class DashboardComponent implements OnInit {
-  userProfile: UserProfile = {
-    id: 0,
-    username: '',
-    email: '',
-    profile_image: null,
-    bio: '',
-    date_joined: ''
-  };
-  userSkills: Skill[] = [];
-  userReviews: Review[] = [];
-  pendingRequests: SwapRequest[] = [];
-  ongoingRequests: SwapRequest[] = [];
+  profileData: ProfileResponse | null = null;
   isLoading = true;
   error: string | null = null;
 
@@ -207,60 +158,50 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    forkJoin({
-      profile: this.userService.getUserProfile(),
-      skills: this.userService.getUserSkills(),
-      reviews: this.userService.getUserReviews(),
-      pendingRequests: this.userService.getPendingSwapRequests(),
-      ongoingRequests: this.userService.getOngoingSwapRequests()
-    }).pipe(
+    this.userService.getUserProfile().pipe(
       catchError(error => {
         this.error = 'Failed to load dashboard data. Please try again later.';
         console.error('Dashboard data loading error:', error);
-        return of({
-          profile: this.userProfile,
-          skills: [],
-          reviews: [],
-          pendingRequests: [],
-          ongoingRequests: []
-        });
+        return of(null);
       }),
       finalize(() => {
         this.isLoading = false;
       })
     ).subscribe(data => {
-      this.userProfile = data.profile;
-      this.userSkills = data.skills;
-      this.userReviews = data.reviews;
-      this.pendingRequests = data.pendingRequests;
-      this.ongoingRequests = data.ongoingRequests;
+      if (data) {
+        this.profileData = data;
+      }
     });
   }
 
   openEditProfileDialog(): void {
+    if (!this.profileData) return;
+
     const dialogRef = this.dialog.open(EditProfileDialogComponent, {
       width: '500px',
       data: {
-        bio: this.userProfile.bio,
-        profilePicture: this.userProfile.profile_image
+        bio: this.profileData.user.about,
+        profilePicture: this.profileData.user.profile_image
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result && this.profileData) {
         this.userService.updateUserProfile(result).pipe(
           catchError(error => {
             this.snackBar.open('Failed to update profile. Please try again.', 'Close', {
               duration: 5000
             });
             console.error('Profile update error:', error);
-            return of(this.userProfile);
+            return of(this.profileData?.user || null);
           })
         ).subscribe(updatedProfile => {
-          this.userProfile = updatedProfile;
-          this.snackBar.open('Profile updated successfully', 'Close', {
-            duration: 3000
-          });
+          if (this.profileData && updatedProfile) {
+            this.profileData.user = updatedProfile;
+            this.snackBar.open('Profile updated successfully', 'Close', {
+              duration: 3000
+            });
+          }
         });
       }
     });
