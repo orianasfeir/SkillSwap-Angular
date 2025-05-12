@@ -15,14 +15,6 @@ export interface UserProfile {
   about: string;
   created_at: string;
   updated_at: string;
-  profile: {
-    avatar: string;
-    bio: string | null;
-    location: string | null;
-    rating: number | null;
-    created_at: string;
-    updated_at: string;
-  };
   qualifications: any[];
 }
 
@@ -84,6 +76,7 @@ export interface ProfileResponse {
 })
 export class UserService {
   private apiUrl = `${environment.apiUrl}`;
+  baseUrl = environment.imagesUrl; // Define the base URL for constructing image paths
 
   constructor(private http: HttpClient) {}
 
@@ -93,7 +86,17 @@ export class UserService {
   }
 
   updateUserProfile(profile: Partial<UserProfile>): Observable<UserProfile> {
-    return this.http.patch<UserProfile>(`${this.apiUrl}/users/profile/`, profile);
+    const formData = new FormData();
+
+    if (profile.about) {
+      formData.append('about', profile.about);
+    }
+
+    if (profile.profile_image && (profile.profile_image as any) instanceof File) {
+      formData.append('profile_image', profile.profile_image);
+    }
+
+    return this.http.patch<UserProfile>(`${this.apiUrl}/users/profile/`, formData);
   }
 
   // Skills Section
@@ -117,4 +120,4 @@ export class UserService {
   getOngoingSwapRequests(): Observable<SwapRequest[]> {
     return this.http.get<SwapRequest[]>(`${this.apiUrl}/swaps/ongoing/`);
   }
-} 
+}

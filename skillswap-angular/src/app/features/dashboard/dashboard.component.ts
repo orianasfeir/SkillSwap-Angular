@@ -47,7 +47,7 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
               <div class="mt-8">
                 <div class="bg-white shadow rounded-lg p-6">
                   <div class="flex items-center space-x-4">
-                    <img [src]="profileData.user.profile_image || 'assets/default-avatar.png'"
+                    <img [src]="getProfileImageUrl(profileData.user.profile_image)"
                          class="w-24 h-24 rounded-full object-cover"
                          alt="Profile picture">
                     <div class="flex-1">
@@ -180,8 +180,8 @@ export class DashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(EditProfileDialogComponent, {
       width: '500px',
       data: {
-        bio: this.profileData.user.about,
-        profilePicture: this.profileData.user.profile_image
+        about: this.profileData.user.about,
+        profile_image: this.profileData.user.profile_image
       }
     });
 
@@ -197,6 +197,10 @@ export class DashboardComponent implements OnInit {
           })
         ).subscribe(updatedProfile => {
           if (this.profileData && updatedProfile) {
+            // Preserve username and created_at fields
+            updatedProfile.username = this.profileData.user.username;
+            updatedProfile.created_at = this.profileData.user.created_at;
+
             this.profileData.user = updatedProfile;
             this.snackBar.open('Profile updated successfully', 'Close', {
               duration: 3000
@@ -206,4 +210,8 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-} 
+
+  getProfileImageUrl(imagePath: string | null): string {
+    return imagePath ? `${this.userService.baseUrl}/${imagePath}` : 'assets/default-avatar.png';
+  }
+}

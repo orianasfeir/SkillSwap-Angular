@@ -62,9 +62,16 @@ class UserViewSet(viewsets.ModelViewSet):
     def profile(self, request):
         user = request.user
         if request.method == 'PATCH':
+            # Log the incoming data for debugging
+            print("PATCH request data:", request.data)
+
             serializer = UserUpdateSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
+            # Log the updated user data
+            print("Updated user data:", serializer.data)
+
             return Response(serializer.data)
             
         user_skills = UserSkill.objects.filter(user=user).select_related('skill')

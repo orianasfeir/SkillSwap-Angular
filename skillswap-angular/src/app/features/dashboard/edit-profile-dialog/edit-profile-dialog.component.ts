@@ -24,7 +24,7 @@ import { MatInputModule } from '@angular/material/input';
         <div class="mb-4">
           <div class="flex items-center justify-center mb-4">
             <div class="relative">
-              <img [src]="profileForm.get('profilePicture')?.value || 'assets/default-avatar.png'"
+              <img [src]="previewImage || (profileForm.get('profile_image')?.value ? baseUrl + '/' + profileForm.get('profile_image')?.value : 'assets/default-avatar.png')"
                    class="w-32 h-32 rounded-full object-cover"
                    alt="Profile picture">
               <button type="button"
@@ -46,7 +46,7 @@ import { MatInputModule } from '@angular/material/input';
         <mat-form-field class="w-full mb-4">
           <mat-label>Bio</mat-label>
           <textarea matInput
-                    formControlName="bio"
+                    formControlName="about"
                     rows="4"
                     placeholder="Tell us about yourself..."></textarea>
         </mat-form-field>
@@ -71,26 +71,32 @@ import { MatInputModule } from '@angular/material/input';
 export class EditProfileDialogComponent {
   @ViewChild('fileInput') fileInput!: ElementRef;
   profileForm: FormGroup;
+  baseUrl = 'http://localhost:8000'; // Replace with your actual base URL
+  previewImage: string | ArrayBuffer | null = null; // To store the preview image URL
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<EditProfileDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { bio: string; profilePicture: string }
+    @Inject(MAT_DIALOG_DATA) public data: { about: string; profile_image: string },
   ) {
     this.profileForm = this.fb.group({
-      bio: [data.bio || '', [Validators.maxLength(500)]],
-      profilePicture: [data.profilePicture || '']
+      about: [data.about || '', [Validators.maxLength(500)]],
+      profile_image: [data.profile_image || '']
     });
   }
 
+  // Updated to send the profilePicture as a File object instead of a base64 string.
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      this.profileForm.patchValue({
+        profile_image: file // Update the form control with the file
+      });
+
+      // Use FileReader to generate a preview URL
       const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.profileForm.patchValue({
-          profilePicture: e.target.result
-        });
+      reader.onload = () => {
+        this.previewImage = reader.result; // Set the preview image URL
       };
       reader.readAsDataURL(file);
     }
@@ -102,11 +108,12 @@ export class EditProfileDialogComponent {
 
   onSubmit(): void {
     if (this.profileForm.valid) {
-      this.dialogRef.close(this.profileForm.value);
+      const formData = { ...this.profileForm.value };
+      this.dialogRef.close(formData);
     }
   }
 
   onCancel(): void {
     this.dialogRef.close();
   }
-} 
+}
