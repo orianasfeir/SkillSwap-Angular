@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import SkillSwapRequest
 from users.models import User
-from skills.models import Skill
+from skills.models import Skill, UserSkill
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from rest_framework import viewsets, status, permissions
@@ -13,6 +13,7 @@ from .serializers import (
     SkillSwapRequestCreateSerializer,
     SkillSwapRequestUpdateSerializer
 )
+from django.db import models
 
 
 class SkillSwapRequestViewSet(viewsets.ModelViewSet):
@@ -21,7 +22,8 @@ class SkillSwapRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return SkillSwapRequest.objects.filter(
-            user_requested=self.request.user
+            models.Q(user_requested=self.request.user) |
+            models.Q(user_requesting=self.request.user)
         ).select_related(
             'user_requesting',
             'user_requested',
@@ -39,16 +41,24 @@ class SkillSwapRequestViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
+        # Ensure skill_offered and skill_requested are IDs from user_skills
+        skill_offered_id = serializer.validated_data['skill_offered']
+        skill_requested_id = serializer.validated_data['skill_requested']
+
+        # Fetch user_skills entry and extract skill_id
+        skill_offered_entry = get_object_or_404(UserSkill, id=skill_offered_id)
+        skill_requested_entry = get_object_or_404(UserSkill, id=skill_requested_id)
+
         # Create the swap request
         swap_request = SkillSwapRequest.objects.create(
             user_requesting=request.user,
             user_requested=serializer.validated_data['user_requested'],
-            skill_offered=serializer.validated_data['skill_offered'],
-            skill_requested=serializer.validated_data['skill_requested'],
+            skill_offered_id=skill_offered_entry.skill_id,
+            skill_requested_id=skill_requested_entry.skill_id,
             proposed_time=serializer.validated_data.get('proposed_time')
         )
-        
+
         return Response(
             SkillSwapRequestSerializer(swap_request).data,
             status=status.HTTP_201_CREATED

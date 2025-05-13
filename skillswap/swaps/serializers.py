@@ -45,9 +45,9 @@ class SkillSwapRequestSerializer(serializers.ModelSerializer):
 class SkillSwapRequestCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SkillSwapRequest
-        fields = ['user_requested_id', 'skill_offered_id', 'skill_requested_id', 'proposed_time']
+        fields = ['user_requested', 'skill_offered', 'skill_requested', 'proposed_time']
 
 class SkillSwapRequestUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SkillSwapRequest
-        fields = ['status', 'proposed_time'] 
+        fields = ['status', 'proposed_time']
