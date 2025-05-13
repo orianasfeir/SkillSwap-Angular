@@ -72,7 +72,7 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
               <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Your Skills</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <mat-card *ngFor="let skill of profileData.skills" class="p-4">
+                  <mat-card *ngFor="let skill of profileData.skills" class="!bg-white p-4">
                     <mat-card-content>
                       <h4 class="font-bold">{{ skill.name }}</h4>
                       <div class="flex items-center mt-2">
@@ -83,7 +83,7 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
                             </div>
                           </div>
                         </div>
-                        <span class="ml-2 text-sm text-gray-600">{{ skill.proficiency }}/5</span>
+                        <span class="ml-2 text-sm text-gray-600">{{ skill.proficiency }}/10</span>
                       </div>
                     </mat-card-content>
                   </mat-card>
@@ -97,7 +97,7 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
               <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Your Reviews</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <mat-card *ngFor="let review of profileData.reviews" class="p-4">
+                  <mat-card *ngFor="let review of profileData.reviews" class="!bg-white p-4">
                     <mat-card-content>
                       <div class="flex items-center mb-4">
                         <img *ngIf="review.reviewer_profile_image" 
@@ -134,7 +134,7 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
               <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Completed Swaps</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <mat-card *ngFor="let swap of profileData.completed_swaps" class="p-4">
+                  <mat-card *ngFor="let swap of profileData.completed_swaps" class="!bg-white p-4">
                     <mat-card-content>
                       <p class="text-gray-800">{{ swap.skill }}</p>
                     </mat-card-content>

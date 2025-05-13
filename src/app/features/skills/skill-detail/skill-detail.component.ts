@@ -17,7 +17,13 @@ import { SwapService, SwapRequest } from '../../../core/services/swap.service';
 @Component({
   selector: 'app-skill-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, MatIconModule, MatDialogModule], // Added MatDialogModule
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    HttpClientModule, 
+    MatIconModule, 
+    MatDialogModule
+  ],
   template: `<div class="min-h-screen bg-gray-100">
     <div class="py-10">
       <header *ngIf="skillDetail$ | async as details">
@@ -202,7 +208,6 @@ export class SkillDetailComponent implements OnInit {
   }
 
   openRequestSwapDialog(userId: number): void {
-    console.log('Opening dialog for user ID:', userId);
     const dialogRef = this.dialog.open(RequestSwapDialogComponent, {
       width: '500px',
       data: {
@@ -230,14 +235,14 @@ export class SkillDetailComponent implements OnInit {
     };
 
     this.swapService.createSwapRequest(request).subscribe({
-      next: (response: SwapRequest) => {
+      next: (response) => {
         console.log('Swap request created successfully', response);
         alert('Your swap request has been sent successfully!');
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error creating swap request', error);
         alert('There was an error sending your swap request. Please try again later.');
       }
     });
   }
-}
+} 
