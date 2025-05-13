@@ -6,8 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-request-swap-dialog',
@@ -19,9 +17,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule
+    MatSelectModule
   ],
   template: `
     <div class="p-6">
@@ -39,23 +35,19 @@ import { MatNativeDateModule } from '@angular/material/core';
           </mat-error>
         </mat-form-field>
         
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Proposed Date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="proposedDate" required>
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="swapForm.get('proposedDate')?.hasError('required')">
+        <div class="mb-4">
+          <label for="proposedDate" class="block text-sm font-medium text-gray-700 mb-1">Proposed Date</label>
+          <input 
+            type="date" 
+            id="proposedDate" 
+            formControlName="proposedDate"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+            required
+          >
+          <div *ngIf="swapForm.get('proposedDate')?.invalid && swapForm.get('proposedDate')?.touched" class="text-red-500 text-sm mt-1">
             Please select a proposed date
-          </mat-error>
-        </mat-form-field>
-        
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Message (Optional)</mat-label>
-          <textarea matInput
-                    formControlName="message"
-                    rows="3"
-                    placeholder="Add a message to your request..."></textarea>
-        </mat-form-field>
+          </div>
+        </div>
 
         <div class="flex justify-end gap-2">
           <button mat-button
@@ -88,9 +80,20 @@ export class RequestSwapDialogComponent {
   ) {
     this.swapForm = this.fb.group({
       offeredSkillId: ['', Validators.required],
-      proposedDate: ['', Validators.required],
-      message: ['', Validators.maxLength(500)]
+      proposedDate: [this.formatDate(new Date()), Validators.required]
     });
+  }
+
+  formatDate(date: Date): string {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
   }
 
   onSubmit(): void {

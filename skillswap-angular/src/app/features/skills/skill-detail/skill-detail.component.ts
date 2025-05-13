@@ -225,8 +225,7 @@ export class SkillDetailComponent implements OnInit {
       offered_skill_id: swapData.offeredSkillId,
       target_user_id: swapData.targetUserId,
       target_skill_id: swapData.targetSkillId,
-      proposed_date: swapData.proposedDate,
-      message: swapData.message
+      proposed_date: swapData.proposedDate
     };
 
     this.swapService.createSwapRequest(request).subscribe({

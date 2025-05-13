@@ -25,11 +25,10 @@ export class SwapService {
 
   createSwapRequest(swapData: SwapRequest): Observable<SwapRequest> {
     return this.http.post<SwapRequest>(`${this.apiUrl}/swaps/`, {
-      offered_skill_id: swapData.offered_skill_id,
-      target_user_id: swapData.target_user_id,
-      target_skill_id: swapData.target_skill_id,
-      proposed_date: swapData.proposed_date,
-      message: swapData.message
+      user_requested: swapData.target_user_id,
+      skill_offered: swapData.offered_skill_id,
+      skill_requested: swapData.target_skill_id,
+      proposed_time: swapData.proposed_date
     });
   }
 
