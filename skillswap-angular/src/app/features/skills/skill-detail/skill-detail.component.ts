@@ -7,11 +7,13 @@ import {
   SkillDetailResponse,
 } from '../../../core/services/skills.service';
 import { HttpClientModule } from '@angular/common/http'; // Import if not globally provided or if service needs it directly
+import { MatIconModule } from '@angular/material/icon';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-skill-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule], // HttpClientModule might not be needed if SkillsService is correctly provided
+  imports: [CommonModule, RouterModule, HttpClientModule, MatIconModule], // HttpClientModule might not be needed if SkillsService is correctly provided
   template: `<div class="min-h-screen bg-gray-100">
     <div class="py-10">
       <header *ngIf="skillDetail$ | async as details">
@@ -43,9 +45,9 @@ import { HttpClientModule } from '@angular/common/http'; // Import if not global
                   <div class="flex items-center mb-4">
                     <img
                       *ngIf="offering.user.profile_image"
-                      [src]="offering.user.profile_image"
+                      [src]="getImageUrl(offering.user.profile_image)"
                       alt="{{ offering.user.username }}"
-                      class="w-12 h-12 rounded-full mr-4"
+                      class="w-12 h-12 rounded-full mr-4 object-cover"
                     />
                     <div
                       *ngIf="!offering.user.profile_image"
@@ -61,7 +63,7 @@ import { HttpClientModule } from '@angular/common/http'; // Import if not global
                     Proficiency:
                     <span class="font-medium">{{
                       offering.proficiency_level
-                    }}</span>
+                    }}/10</span>
                   </p>
 
                   <div *ngIf="offering.qualifications.length > 0" class="mt-3">
@@ -105,15 +107,33 @@ import { HttpClientModule } from '@angular/common/http'; // Import if not global
                   *ngFor="let review of details.reviews"
                   class="bg-white shadow-lg rounded-lg p-6"
                 >
-                  <div class="flex items-center mb-2">
-                    <h4 class="text-lg font-semibold text-gray-900">
-                      {{ review.reviewer }}
-                    </h4>
-                    <span class="ml-auto text-yellow-500"
-                      >{{ review.rating }} / 5 ★</span
+                  <div class="flex gap-4 items-center mb-4">
+                    <img
+                      *ngIf="review.reviewer_profile_image"
+                      [src]="getImageUrl(review.reviewer_profile_image)"
+                      alt="{{ review.reviewer }}"
+                      class="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div
+                      *ngIf="!review.reviewer_profile_image"
+                      class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-lg font-semibold"
                     >
+                      {{ review.reviewer.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <h4 class="text-lg font-semibold text-gray-900">
+                        {{ review.reviewer }}
+                      </h4>
+                      <div class="flex text-yellow-400">
+                        <mat-icon *ngFor="let star of [1,2,3,4,5]"
+                                [class.text-yellow-400]="star <= review.rating"
+                                [class.text-gray-300]="star > review.rating">
+                          star
+                        </mat-icon>
+                      </div>
+                    </div>
                   </div>
-                  <p class="text-gray-700">{{ review.text }}</p>
+                  <p class="text-gray-700 mt-2">{{ review.text }}</p>
                 </div>
               </div>
               <ng-template #noReviews>
@@ -149,6 +169,14 @@ export class SkillDetailComponent implements OnInit {
     if (this.skillId) {
       this.skillDetail$ = this.skillsService.getSkillDetails(this.skillId);
     }
+  }
+
+  getImageUrl(imagePath: string | null): string {
+    if (!imagePath) return '';
+    // If the image path already starts with http, return it as is
+    if (imagePath.startsWith('http')) return imagePath;
+    // Otherwise, prepend the images base URL
+    return `${environment.imagesUrl}${imagePath}`;
   }
 
   requestSwap(userId: number): void {

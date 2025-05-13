@@ -55,7 +55,8 @@ class SkillViewSet(viewsets.ModelViewSet):
                 'id': review.id,
                 'text': review.text,
                 'rating': review.rating,
-                'reviewer': review.reviewer.username
+                'reviewer': review.reviewer.username,
+                'reviewer_profile_image': review.reviewer.profile_image.url if review.reviewer.profile_image else None
             } for review in reviews]
         }
         return Response(data)

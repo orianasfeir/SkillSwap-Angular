@@ -42,6 +42,7 @@ export interface SkillReview {
   text: string;
   rating: number;
   reviewer: string; // username
+  reviewer_profile_image: string | null;
 }
 
 export interface SkillDetailResponse {

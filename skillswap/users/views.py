@@ -78,15 +78,21 @@ class UserViewSet(viewsets.ModelViewSet):
         for skill in user_skills:
             skill.divided_proficiency = skill.proficiency_level // 2 if skill.proficiency_level else 0
         
-        reviews = Review.objects.filter(user_reviewed=user).select_related('reviewer')
+        reviews = Review.objects.filter(user_reviewed=user).select_related('reviewer', 'swap_request', 'swap_request__skill_requested')
         completed_swaps = user.requests_received.filter(status='completed')
         
         data = {
             'user': UserSerializer(user).data,
             'skills': [{'id': skill.id, 'name': skill.skill.name, 'proficiency': skill.divided_proficiency} 
                       for skill in user_skills],
-            'reviews': [{'id': review.id, 'text': review.text, 'rating': review.rating,
-                        'reviewer': review.reviewer.username} for review in reviews],
+            'reviews': [{
+                'id': review.id, 
+                'text': review.text, 
+                'rating': review.rating,
+                'reviewer': review.reviewer.username,
+                'reviewer_profile_image': review.reviewer.profile_image.url if review.reviewer.profile_image else None,
+                'skill_name': review.swap_request.skill_requested.name if review.swap_request and review.swap_request.skill_requested else 'Unknown skill'
+            } for review in reviews],
             'completed_swaps': [{'id': swap.id, 'skill': swap.skill_requested.name} 
                                for swap in completed_swaps]
         }

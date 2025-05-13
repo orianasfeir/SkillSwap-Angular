@@ -36,6 +36,8 @@ export interface Review {
   text: string;
   rating: number;
   reviewer: string;
+  reviewer_profile_image: string | null;
+  skill_name: string;
 }
 
 export interface SwapRequest {

@@ -99,17 +99,29 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <mat-card *ngFor="let review of profileData.reviews" class="p-4">
                     <mat-card-content>
-                      <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                          <mat-icon *ngFor="let star of [1,2,3,4,5]"
-                                   [class.text-yellow-400]="star <= review.rating"
-                                   [class.text-gray-300]="star > review.rating">
-                            star
-                          </mat-icon>
+                      <div class="flex items-center mb-4">
+                        <img *ngIf="review.reviewer_profile_image" 
+                             [src]="getProfileImageUrl(review.reviewer_profile_image)"
+                             class="w-10 h-10 rounded-full object-cover mr-3"
+                             alt="Reviewer's photo">
+                        <div *ngIf="!review.reviewer_profile_image"
+                             class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-lg font-semibold mr-3">
+                          {{ review.reviewer.charAt(0).toUpperCase() }}
+                        </div>
+                        <div>
+                          <div class="flex text-yellow-400">
+                            <mat-icon *ngFor="let star of [1,2,3,4,5]"
+                                    [class.text-yellow-400]="star <= review.rating"
+                                    [class.text-gray-300]="star > review.rating">
+                              star
+                            </mat-icon>
+                          </div>
+                          <p class="text-sm text-gray-600">
+                            <span class="capitalize font-medium">{{ review.reviewer }}</span> reviewed you for <span class="capitalize font-medium">{{ review.skill_name }}</span>
+                          </p>
                         </div>
                       </div>
-                      <p class="text-gray-800">{{ review.text }}</p>
-                      <p class="text-sm text-gray-600 mt-2">- {{ review.reviewer }}</p>
+                      <p class="text-gray-800 mt-2">{{ review.text }}</p>
                     </mat-card-content>
                   </mat-card>
                   <div *ngIf="!profileData.reviews?.length" class="text-gray-500 text-center col-span-full py-4">
