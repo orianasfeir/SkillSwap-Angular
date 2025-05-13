@@ -12,15 +12,47 @@ export interface Skill {
   is_featured: boolean;
 }
 
+export interface Qualification {
+  id: number;
+  description: string;
+  verified: boolean;
+}
+
 export interface UserSkill {
   id: number;
   proficiency_level: number;
-  qualifications: any[]; // Adjust type if needed
+  qualifications: Qualification[];
   skill: Skill; // Nested Skill object
 }
 
+export interface UserProfile {
+  id: number;
+  username: string;
+  profile_image: string | null;
+}
+
+export interface UserOfferingSkill {
+  user: UserProfile;
+  proficiency_level: string;
+  qualifications: Qualification[];
+}
+
+export interface SkillReview {
+  id: number;
+  text: string;
+  rating: number;
+  reviewer: string; // username
+}
+
+export interface SkillDetailResponse {
+  skill: Skill;
+  user_has_skill: boolean; // Whether the current logged-in user has this skill
+  users_offering: UserOfferingSkill[];
+  reviews: SkillReview[];
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SkillsService {
   private apiUrl = `${environment.apiUrl}/`;
@@ -28,28 +60,45 @@ export class SkillsService {
   constructor(private http: HttpClient) {}
 
   getSkills(): Observable<Skill[]> {
-    return this.http.get<{ results: Skill[] }>(`${this.apiUrl}skills`).pipe(
-      map(response => response.results)
-    );
+    return this.http
+      .get<{ results: Skill[] }>(`${this.apiUrl}skills`)
+      .pipe(map((response) => response.results));
   }
 
-  addUserSkill(skillData: { skill_id: number; proficiency_level: number }): Observable<any> {
+  addUserSkill(skillData: {
+    skill_id: number;
+    proficiency_level: number;
+  }): Observable<any> {
     return this.http.post(`${this.apiUrl}user-skills/`, skillData);
   }
 
   getUserSkills(): Observable<UserSkill[]> {
-    return this.http.get<{ results: UserSkill[] }>(`${this.apiUrl}user-skills/`).pipe(
-      map(response => response.results) // Extract the array from the response
-    );
+    return this.http
+      .get<{ results: UserSkill[] }>(`${this.apiUrl}user-skills/`)
+      .pipe(
+        map((response) => response.results) // Extract the array from the response
+      );
   }
 
   deleteUserSkill(userSkillId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}user-skills/${userSkillId}/`);
   }
 
-  editUserSkill(userSkillId: number, proficiencyLevel: number): Observable<UserSkill> {
-    return this.http.patch<UserSkill>(`${this.apiUrl}user-skills/${userSkillId}/`, {
-      proficiency_level: proficiencyLevel
-    });
+  editUserSkill(
+    userSkillId: number,
+    proficiencyLevel: number
+  ): Observable<UserSkill> {
+    return this.http.patch<UserSkill>(
+      `${this.apiUrl}user-skills/${userSkillId}/`,
+      {
+        proficiency_level: proficiencyLevel,
+      }
+    );
+  }
+
+  getSkillDetails(skillId: number): Observable<SkillDetailResponse> {
+    return this.http.get<SkillDetailResponse>(
+      `${this.apiUrl}skills/${skillId}/`
+    );
   }
 }
