@@ -33,7 +33,7 @@ class SkillViewSet(viewsets.ModelViewSet):
         
         reviews = Review.objects.filter(
             swap_request__skill_requested=skill
-        ).select_related('reviewer')
+        ).select_related('reviewer', 'user_reviewed', 'swap_request', 'swap_request__skill_requested')
         
         data = {
             'skill': SkillSerializer(skill).data,
@@ -56,7 +56,9 @@ class SkillViewSet(viewsets.ModelViewSet):
                 'text': review.text,
                 'rating': review.rating,
                 'reviewer': review.reviewer.username,
-                'reviewer_profile_image': review.reviewer.profile_image.url if review.reviewer.profile_image else None
+                'reviewer_profile_image': review.reviewer.profile_image.url if review.reviewer.profile_image else None,
+                'user_reviewed': review.user_reviewed.username,
+                'skill_name': skill.name
             } for review in reviews]
         }
         return Response(data)
@@ -69,7 +71,46 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         return UserSkill.objects.filter(user=self.request.user).select_related('skill')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user_skill = serializer.save(user=self.request.user)
+        
+        # Handle qualification_description if provided
+        qualification_description = self.request.data.get('qualification_description')
+        if qualification_description:
+            from users.models import Qualification
+            qualification = Qualification.objects.create(
+                user=self.request.user,
+                description=qualification_description
+            )
+            user_skill.qualifications.add(qualification)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer, instance)
+        return Response(serializer.data)
+        
+    def perform_update(self, serializer, instance):
+        user_skill = serializer.save()
+        
+        qualification_description = self.request.data.get('qualification_description')
+        if qualification_description:
+            from users.models import Qualification
+            existing_qualifications = instance.qualifications.all()
+            
+            if existing_qualifications.exists():
+                # Update the first existing qualification
+                qualification = existing_qualifications.first()
+                qualification.description = qualification_description
+                qualification.save()
+            else:
+                # Create a new qualification
+                qualification = Qualification.objects.create(
+                    user=self.request.user,
+                    description=qualification_description
+                )
+                user_skill.qualifications.add(qualification)
 
     @action(detail=False, methods=['get'])
     def browse(self, request):
