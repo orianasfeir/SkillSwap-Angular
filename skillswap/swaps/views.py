@@ -42,20 +42,12 @@ class SkillSwapRequestViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Ensure skill_offered and skill_requested are IDs from user_skills
-        skill_offered_id = serializer.validated_data['skill_offered']
-        skill_requested_id = serializer.validated_data['skill_requested']
-
-        # Fetch user_skills entry and extract skill_id
-        skill_offered_entry = get_object_or_404(UserSkill, id=skill_offered_id)
-        skill_requested_entry = get_object_or_404(UserSkill, id=skill_requested_id)
-
         # Create the swap request
         swap_request = SkillSwapRequest.objects.create(
             user_requesting=request.user,
             user_requested=serializer.validated_data['user_requested'],
-            skill_offered_id=skill_offered_entry.skill_id,
-            skill_requested_id=skill_requested_entry.skill_id,
+            skill_offered_id=serializer.validated_data['skill_offered'].id,
+            skill_requested_id=serializer.validated_data['skill_requested'].id,
             proposed_time=serializer.validated_data.get('proposed_time')
         )
 
@@ -140,6 +132,42 @@ class SkillSwapRequestViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def ongoing(self, request):
         queryset = self.get_queryset().filter(status__in=['accepted', 'in_progress'])
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def incoming_requests(self, request):
+        """Return all incoming swap requests for the authenticated user."""
+        queryset = self.get_queryset().filter(user_requested=request.user, status='pending')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def outgoing_requests(self, request):
+        """Return all outgoing swap requests made by the authenticated user."""
+        queryset = self.get_queryset().filter(user_requesting=request.user, status='pending')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def active_requests(self, request):
+        """Return all active swap requests for the authenticated user."""
+        queryset = self.get_queryset().filter(
+            models.Q(user_requested=request.user) | models.Q(user_requesting=request.user),
+            status__in=['accepted', 'in_progress']
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

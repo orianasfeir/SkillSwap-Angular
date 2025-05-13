@@ -66,11 +66,21 @@ export interface SwapRequest {
   updated_at: string;
 }
 
+export interface CompletedSwap {
+  id: number;
+  skill_offered: string | null;
+  skill_requested: string | null;
+  user_requesting: string;
+  user_requested: string;
+  proposed_time: string;
+  completed_at: string;
+}
+
 export interface ProfileResponse {
   user: UserProfile;
   skills: Skill[];
   reviews: Review[];
-  completed_swaps: any[];
+  completed_swaps: CompletedSwap[];
 }
 
 @Injectable({

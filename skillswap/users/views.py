@@ -79,7 +79,7 @@ class UserViewSet(viewsets.ModelViewSet):
             skill.divided_proficiency = skill.proficiency_level // 2 if skill.proficiency_level else 0
         
         reviews = Review.objects.filter(user_reviewed=user).select_related('reviewer', 'swap_request', 'swap_request__skill_requested')
-        completed_swaps = user.requests_received.filter(status='completed')
+        completed_swaps = user.requests_received.filter(status='completed') | user.requests_made.filter(status='completed')
         
         data = {
             'user': UserSerializer(user).data,
@@ -93,8 +93,15 @@ class UserViewSet(viewsets.ModelViewSet):
                 'reviewer_profile_image': review.reviewer.profile_image.url if review.reviewer.profile_image else None,
                 'skill_name': review.swap_request.skill_requested.name if review.swap_request and review.swap_request.skill_requested else 'Unknown skill'
             } for review in reviews],
-            'completed_swaps': [{'id': swap.id, 'skill': swap.skill_requested.name} 
-                               for swap in completed_swaps]
+            'completed_swaps': [{
+                'id': swap.id,
+                'skill_offered': swap.skill_offered.name if swap.skill_offered else None,
+                'skill_requested': swap.skill_requested.name if swap.skill_requested else None,
+                'user_requesting': swap.user_requesting.username,
+                'user_requested': swap.user_requested.username,
+                'proposed_time': swap.proposed_time,
+                'completed_at': swap.updated_at
+            } for swap in completed_swaps]
         }
         return Response(data)
 

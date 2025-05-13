@@ -26,7 +26,7 @@ import { MatSelectModule } from '@angular/material/select';
         <mat-form-field class="w-full mb-4">
           <mat-label>Your Skill to Offer</mat-label>
           <mat-select formControlName="offeredSkillId" required>
-            <mat-option *ngFor="let skill of data.userSkills" [value]="skill.id">
+            <mat-option *ngFor="let skill of data.userSkills" [value]="skill.skill.id">
               {{ skill.skill.name }}
             </mat-option>
           </mat-select>
@@ -110,4 +110,4 @@ export class RequestSwapDialogComponent {
   onCancel(): void {
     this.dialogRef.close();
   }
-} 
+}

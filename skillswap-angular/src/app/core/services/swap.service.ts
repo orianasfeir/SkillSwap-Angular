@@ -15,6 +15,18 @@ export interface SwapRequest {
   updated_at?: string;
 }
 
+export interface SwapResponse {
+  id: number;
+  user_requesting: { id: number; username: string };
+  user_requested: { id: number; username: string };
+  skill_offered: { id: number; name: string };
+  skill_requested: { id: number; name: string };
+  status: string;
+  proposed_time: string;
+  created_at: string;
+  updated_at: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -51,4 +63,20 @@ export class SwapService {
   completeSwapRequest(swapId: number): Observable<SwapRequest> {
     return this.http.post<SwapRequest>(`${this.apiUrl}/swaps/${swapId}/complete/`, {});
   }
-} 
+
+  cancelSwapRequest(swapId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/swaps/${swapId}/cancel/`, {});
+  }
+
+  getIncomingSwaps(): Observable<{ results: SwapResponse[] }> {
+    return this.http.get<{ results: SwapResponse[] }>(`${this.apiUrl}/swaps/incoming_requests/`);
+  }
+
+  getOutgoingSwaps(): Observable<{ results: SwapResponse[] }> {
+    return this.http.get<{ results: SwapResponse[] }>(`${this.apiUrl}/swaps/outgoing_requests/`);
+  }
+
+  getActiveSwaps(): Observable<{ results: SwapResponse[] }> {
+    return this.http.get<{ results: SwapResponse[] }>(`${this.apiUrl}/swaps/active_requests/`);
+  }
+}

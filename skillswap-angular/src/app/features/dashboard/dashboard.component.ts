@@ -136,7 +136,12 @@ import { UserService, ProfileResponse } from '../../core/services/user.service';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <mat-card *ngFor="let swap of profileData.completed_swaps" class="!bg-white p-4">
                     <mat-card-content>
-                      <p class="text-gray-800">{{ swap.skill }}</p>
+                      <p><strong>Skill Offered:</strong> {{ swap.skill_offered || 'N/A' }}</p>
+                      <p><strong>Skill Requested:</strong> {{ swap.skill_requested || 'N/A' }}</p>
+                      <p><strong>Requesting User:</strong> {{ swap.user_requesting }}</p>
+                      <p><strong>Requested User:</strong> {{ swap.user_requested }}</p>
+                      <p><strong>Proposed Time:</strong> {{ swap.proposed_time | date:'medium' }}</p>
+                      <p><strong>Completed At:</strong> {{ swap.completed_at | date:'medium' }}</p>
                     </mat-card-content>
                   </mat-card>
                   <div *ngIf="!profileData.completed_swaps?.length" class="text-gray-500 text-center col-span-full py-4">
