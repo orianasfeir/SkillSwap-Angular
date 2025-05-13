@@ -121,9 +121,6 @@ import { environment } from '../../../../environments/environment';
                       {{ review.reviewer.charAt(0).toUpperCase() }}
                     </div>
                     <div>
-                      <h4 class="text-lg font-semibold text-gray-900">
-                        {{ review.reviewer }}
-                      </h4>
                       <div class="flex text-yellow-400">
                         <mat-icon *ngFor="let star of [1,2,3,4,5]"
                                 [class.text-yellow-400]="star <= review.rating"
@@ -131,6 +128,11 @@ import { environment } from '../../../../environments/environment';
                           star
                         </mat-icon>
                       </div>
+                      <p class="text-sm text-gray-600">
+                        <span class="capitalize font-medium">{{ review.reviewer }}</span> reviewed 
+                        <span class="capitalize font-medium">{{ review.user_reviewed }}</span> for 
+                        <span class="capitalize font-medium">{{ review.skill_name }}</span>
+                      </p>
                     </div>
                   </div>
                   <p class="text-gray-700 mt-2">{{ review.text }}</p>

@@ -40,14 +40,14 @@ import { Router, RouterModule } from '@angular/router';
                 >
                   <h2 class="text-xl font-semibold">{{ skill.skill.name }}</h2>
                   <p class="text-gray-600">{{ skill.skill.description }}</p>
-                  <p class="text-gray-600">
-                    Proficiency Level: {{ skill.proficiency_level }}
+                  <p *ngIf="skill.proficiency_level" class="text-gray-600">
+                   <span class="font-semibold">Proficiency Level:</span> {{ skill.proficiency_level }}
                   </p>
                   <p
                     *ngIf="skill.qualifications.length > 0"
                     class="text-gray-600"
                   >
-                    Qualification: {{ skill.qualifications[0].description }}
+                    <span class="font-semibold">Qualification:</span> {{ skill.qualifications[0].description }}
                   </p>
                   <button
                     (click)="openEditSkillDialog(skill)"
@@ -142,18 +142,28 @@ export class SkillsComponent implements OnInit {
   }
 
   openEditSkillDialog(userSkill: UserSkill): void {
+    // Get the first qualification if it exists
+    const qualification = userSkill.qualifications && userSkill.qualifications.length > 0 
+      ? userSkill.qualifications[0].description 
+      : '';
+      
     const dialogRef = this.dialog.open(AddSkillDialogComponent, {
       width: '400px',
       data: {
         skillId: userSkill.skill.id,
         proficiencyLevel: userSkill.proficiency_level,
+        qualificationDescription: qualification
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.skillsService
-          .editUserSkill(userSkill.id, result.proficiency_level)
+          .editUserSkill(
+            userSkill.id, 
+            result.proficiency_level, 
+            result.qualification_description
+          )
           .subscribe(() => {
             console.log('Skill updated successfully');
             this.userSkills$ = this.skillsService.getUserSkills(); // Refresh user skills

@@ -43,6 +43,8 @@ export interface SkillReview {
   rating: number;
   reviewer: string; // username
   reviewer_profile_image: string | null;
+  user_reviewed: string; // username of the person being reviewed
+  skill_name: string;
 }
 
 export interface SkillDetailResponse {
@@ -69,6 +71,7 @@ export class SkillsService {
   addUserSkill(skillData: {
     skill_id: number;
     proficiency_level: number;
+    qualification_description?: string;
   }): Observable<any> {
     return this.http.post(`${this.apiUrl}user-skills/`, skillData);
   }
@@ -87,13 +90,20 @@ export class SkillsService {
 
   editUserSkill(
     userSkillId: number,
-    proficiencyLevel: number
+    proficiencyLevel: number,
+    qualificationDescription?: string
   ): Observable<UserSkill> {
+    const updateData: any = {
+      proficiency_level: proficiencyLevel
+    };
+    
+    if (qualificationDescription) {
+      updateData.qualification_description = qualificationDescription;
+    }
+    
     return this.http.patch<UserSkill>(
       `${this.apiUrl}user-skills/${userSkillId}/`,
-      {
-        proficiency_level: proficiencyLevel,
-      }
+      updateData
     );
   }
 
